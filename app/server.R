@@ -1,6 +1,7 @@
 library(shinydashboard)
 library(markdown)
 
+
 server <- function(input, output, session) {
     output$plot <- renderPlot({
         plot(cars, type=input$plotType)
