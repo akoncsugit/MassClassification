@@ -1,71 +1,102 @@
 library(shinydashboard)
-
-# ui <- dashboardPage(
-#     dashboardHeader(title = "Basic dashboard"),
-# 
-#     dashboardSidebar(
-#         sidebarMenu(
-#             menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-#             menuItem("Widgets", tabName = "widgets", icon = icon("th"))
-#         )
-#     ),
-# 
-#     dashboardBody(
-#         # Boxes need to be put in a row (or column)
-#         fluidRow(
-#             box(plotOutput("plot1", height = 250)),
-# 
-#             box(
-#                 title = "Controls",
-#                 sliderInput("slider", "Number of observations:", 1, 100, 50)
-#             )
-#         )
-#     )
-# )
-
-
+library(markdown)
 # Define UI for random distribution app ----
-ui <- fluidPage(theme = shinytheme("superhero"),
+ui <-  navbarPage("Navbar!",
+                           theme = shinytheme("superhero"),
+                           tabPanel("About",
+                                    sidebarLayout(
+                                        sidebarPanel(
+                                            radioButtons("plotType", "Plot type",
+                                                         c("Scatter"="p", "Line"="l")
+                                            )
+                                        ),
+                                        mainPanel(
+                                            tabsetPanel(
+                                                tabPanel("Tab 1", 
+                                                         plotOutput("plot")),
+                                                tabPanel("Tab 2")
+                                            ),
+                                            
+                                        )
+                                    )
+                           ),
+                           tabPanel("Data Exploration",
+                                    sidebarLayout(
+                                        sidebarPanel(
+                                            radioButtons("plotType", "Plot type",
+                                                         c("Scatter"="p", "Line"="l")
+                                            )
+                                        ),
+                                        mainPanel(
+                                            tabsetPanel(
+                                                tabPanel("Tab 1", 
+                                                         plotOutput("plot")),
+                                                tabPanel("Tab 2")
+                                            ),
+                                            
+                                        )
+                                    )
+                           ),
 
-    # App title ----
-    titlePanel("Tabsets"),
-    
+                  tabPanel("Model",
+                           sidebarLayout(
+                               sidebarPanel(
+                                   radioButtons("plotType", "Plot type",
+                                                c("Scatter"="p", "Line"="l")
+                                   )
+                               ),
+                               mainPanel(
+                                   tabsetPanel(
+                                       tabPanel("Model", 
+                                                plotOutput("plot")),
+                                       tabPanel("Model Fitting"),
+                                       tabPanel("Prediction")
+                                   ),
+                                   
+                               )
+                           )
+                  ),
+                  tabPanel("Data",
+                           sidebarLayout(
+                               sidebarPanel(
+                                   radioButtons("plotType", "Plot type",
+                                                c("Scatter"="p", "Line"="l")
+                                   )
+                               ),
+                               mainPanel(
+                                   tabsetPanel(
+                                       tabPanel("Tab 1", 
+                                                plotOutput("plot")),
+                                       tabPanel("Tab 2")
+                                   ),
+                                   
+                               )
+                           )
+                  ),
 
-    # Sidebar layout with input and output definitions ----
-    sidebarLayout(
-
-        # Sidebar panel for inputs ----
-        sidebarPanel(
-
-            # Input: Select the random distribution type ----
-            radioButtons("dist", "Distribution type:",
-                         c("Normal" = "norm",
-                           "Uniform" = "unif",
-                           "Log-normal" = "lnorm",
-                           "Exponential" = "exp")),
-
-            # br() element to introduce extra vertical spacing ----
-            br(),
-
-            # Input: Slider for the number of observations to generate ----
-            sliderInput("n",
-                        "Number of observations:",
-                        value = 500,
-                        min = 1,
-                        max = 1000)
-
-        ),
-
-        # Main panel for displaying outputs ----
-        mainPanel(
-
-            # Output: Tabset w/ plot, summary, and table ----
-            tabsetPanel(type = "tabs",
-                        tabPanel("Plot", plotOutput("plot")),
-                        tabPanel("Summary", verbatimTextOutput("summary")),
-                        tabPanel("Table", tableOutput("table"))
-            )
-
-        )
-    )
-)
+                           navbarMenu("More",
+                                      tabPanel("Table",
+                                               DT::dataTableOutput("table")
+                                      ),
+                                      tabPanel("About",
+                                               fluidRow(
+                                                   column(6,
+                                                          
+                                                   ),
+                                                   column(3,
+                                                          img(class="img-polaroid",
+                                                              src=paste0("http://upload.wikimedia.org/",
+                                                                         "wikipedia/commons/9/92/",
+                                                                         "1919_Ford_Model_T_Highboy_Coupe.jpg")),
+                                                          tags$small(
+                                                              "Source: Photographed at the Bay State Antique ",
+                                                              "Automobile Club's July 10, 2005 show at the ",
+                                                              "Endicott Estate in Dedham, MA by ",
+                                                              a(href="http://commons.wikimedia.org/wiki/User:Sfoskett",
+                                                                "User:Sfoskett")
+                                                          )
+                                                   )
+                                               )
+                                      )
+                           )
+                )
