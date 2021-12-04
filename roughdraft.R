@@ -1,75 +1,51 @@
 library(tidyverse)
-library(corrplot) 
-library(naniar)
-# library(logistf)
-
-# library(lares)
-# library(stats)
-
-ObesityDataSet <- read.csv("ObesityDataSet_raw_and_data_sinthetic.csv") %>%
-  mutate(Weight_Level = as_factor(NObeyesdad), Gender = as_factor(Gender), 
-         Family_History = as_factor(family_history_with_overweight),
-         FAVC = as_factor(FAVC), CAEC = as_factor(CAEC),
-         SMOKE = as_factor(SMOKE), SCC = as_factor(SCC),
-         CALC = as_factor(CALC), MTRANS = as_factor(MTRANS),
-         Diagnosis = ifelse(NObeyesdad == "Normal_Weight", 0,
-                        ifelse(NObeyesdad == "Insufficient_Weight", 0, 1))) %>%
-  select(1:4, Family_History, 6:16, Weight_Level, Diagnosis) %>% na.omit()
-
-tib <- as_tibble(table(ObesityDataSet$Diagnosis, ObesityDataSet$Gender, ObesityDataSet$Family_History), .name_repair = make.names)
-
-obesity <- ObesityDataSet %>% select(1:16,18)
-corr_cross(obesity)
-corr_cross(obesity, type =2)
-corr_cross(obesity, type =2, contains = "Diagnosis")
-png(file="test.png", width=1200, height=1600)
-x
-x <-corr_cross(obesity, contains = "Diagnosis")
-
-cor <- cor(ObesityDataSet[sapply(ObesityDataSet, is.numeric)])
-corrplot::corrplot(cor, method="number")
-
-corrplot(O)
-O <- read.csv("ObesityDataSet_raw_and_data_sinthetic.csv")%>% na.omit()
-
-png(file="ob2w.png", width=1200, height=1600)
-GGally::ggpairs(ObesityDataSet)
+library(class)
+library(tree)
+library(caret)
+library(rpart)
+library(rpart.plot)
 
 
+mammo_mass <- read_csv("mammographic_masses.csv",
+                        col_names = c("BI-RADS", "Age", "numShape", "numMargin",
+                                    "numDensity", "numSeverity"), na = "?") %>%
+  mutate("Shape" = cut(numShape, breaks = 4, labels = c("round", "oval",
+                                                       "lobular", "irregular")),
+         "Margin" = cut(numMargin, breaks = 5,
+                        labels = c("circumscribed","microlobulated", "obscured",
+                                   "ill-defined", "spiculated")),
+         "Density" = cut(numDensity,
+                         breaks = 4, labels = c("high", "iso", "low",
+                                                "fat-containing"),
+                                                ordered_result = TRUE),
+         "Severity" = cut(numSeverity, breaks = 2,
+                          labels = c("benign", "maligant")))
+View(mammo_masses)
+maszzz <-mammo_mass %>% na.omit()
+m <- mammo_mass %>% na.omit() %>% select(Age, Shape, Margin, Density, Severity)
+n <- mammo_mass %>% na.omit() %>% select(Age, numSeverity)
+summary(glm(Severity ~ (Shape+Margin+Age)^2 + Density + I(Age^2),
+            family = binomial, data = m))
+summary(glm(Severity ~ I(Age^2),family = binomial, data = m))
+summary(glm(Severity ~ Shape*Age + I(Age^2),family = binomial, data = m))
 
 
-
-O <- read.csv("ObesityDataSet_raw_and_data_sinthetic.csv") %>%
-  mutate(Weight_Level = as.numeric(as_factor(NObeyesdad)), Gender = as.numeric(as_factor(Gender)), 
-         Family_History = as.numeric(as_factor(family_history_with_overweight)),
-         FAVC = as.numeric(as_factor(FAVC)), CAEC = as.numeric(as_factor(CAEC)),
-         SMOKE = as.numeric(as_factor(SMOKE)), SCC = as.numeric(as_factor(SCC)),
-         CALC = as.numeric(as_factor(CALC)), MTRANS = as.numeric(as_factor(MTRANS)),
-         Diagnosis = ifelse(NObeyesdad == "Normal_Weight", 0,
-                            ifelse(NObeyesdad == "Insufficient_Weight", 0, 1))) %>%
-  select(1:4, Family_History, 6:16, Weight_Level, Diagnosis) %>% na.omit()
-
-select(1:4, Family_History, 6:16, Weight_Level, Diagnosis)
+cor <- cor(n[sapply(n, is.numeric)])
+attributes(cor)$dimnames[[1]] <- c("Age", "Severity")
+attributes(cor)$dimnames[[2]] <- c("Age", "Severity")
+cor
+corrplot::corrplot(cor, )
 
 
-png(file="pairsplot.png", width=1000, height=1200)
-GGally::ggpairs(O)
-
-summary(O)
-
-
-corrplot::corrplot(O) 
-corrplot::corrplot(O, is.corr = FALSE, method = "square")
-corrplot()
 # Base plot
-g <- ggplot(data = ObesityDataSet, aes(x= Weight_Level)) + 
-  xlab("Diagnosis by Gender") + ylab("Density")
+g <- ggplot(data = m, aes(x= Severity)) + 
+  xlab("Severity") + ylab("Density")
 
 
 
 ################################ KEEP THIS CODE ################################
 
-g <- ggplot(ObesityDataSet, aes(as.factor(Diagnosis)))
+g <- ggplot(m, aes(Severity))
 
 ## one discrete variable
 d <- g + geom_bar() 
@@ -78,7 +54,7 @@ d + theme_minimal()
 
 
 # One diescrete filled by another
-df <- ggplot(ObesityDataSet, aes(as.factor(Diagnosis), fill = Family_History)) 
+df <- ggplot(m, aes(Age, fill = Severity))
 df + geom_bar(position = "dodge")
 
 ## two discreate variables
@@ -87,45 +63,49 @@ d2 + geom_count(aes(shape = Gender))
 
 
 ## continous one variable
-c <- ggplot(ObesityDataSet, aes(Weight))
+c <- ggplot(m, aes(Age))
 c + geom_histogram(binwidth = 5)
-
-## two continous variables
-c2 <- ggplot(ObesityDataSet, aes(Weight, Age))
-
-## filled by diagnosis
-c2 + geom_jitter(height = 2, width = 2, aes(color = factor(Diagnosis), alpha = Height))
-## alpha is opacity, color, shape, size options
-
-
 
 
 ### one discrete and one continous variable
-dc <- ggplot(ObesityDataSet, aes(as.factor(Diagnosis), Age))
+dc <- ggplot(m, aes(Severity, Age))
 
 ## Family History
-dc + geom_boxplot(aes(fill = as.factor(Diagnosis))) + facet_wrap(~Family_History)
+dc + geom_boxplot(aes(fill = Severity)) + facet_wrap(~Shape)
 
-ObFitData <- ObesityDataSet %>% select(1:16, 18) %>% 
-  mutate(Diagnosis = as_factor(Diagnosis))
-fit <- glm(Diagnosis ~ ., data = ObFitData, family = "binomial")
-fit
+
 ## remove intercept term with -1
 summary(fit)
 
 
 #Plot of Quality vs Total sulfur dioxide
-data <- glmPlot %>% group_by(`total sulfur dioxide`) %>% summarise(propGood = mean(qualityBin), n = n())
-ggplot(data, aes(x = `total sulfur dioxide`, y = propGood, size = n)) + geom_point(stat = "identity")+
-  ggtitle("Quality vs Total sulfur dioxide")
+data <- maszzz %>% group_by(Age) %>% summarise(ProportMaligant = mean(numSeverity), n = n())
+ggplot(data, aes(x = Age, y = ProportMaligant, size = n)) + geom_point(stat = "identity")+
+  ggtitle("QTitle")
+
+table(m$Shape, m$Density, m$Severity)
+
+mean(m$Age)
+summary(m)
 
 
 
-glmFit1 <- 
+### kNN ###
+knn(train = selec(m, Age))
+
+x <- tree(Severity ~ . + I(Age^2), data = m, split = "deviance")
+plot(x)
+text(x)
+giniFit <- tree(Severity ~ ., data = m, split ="gini")
+plot(giniFit)
+text(giniFit, pretty = 0, cex = 0.5)
 
 
+# Create a decision tree model
+tree <- rpart(Severity~., data=m, cp=0.0001)
+# Visualize the decision tree with rpart.plot
+rpart.plot(giniFit, box.palette="GnRd", nn=TRUE)
+rpart.plot(tree, box.palette="RdBu", shadow.col="gray", nn=TRUE)
 
-data <- ObFitData %>% filter(Diagnosis == 0)
-
-
+# caret :  method = "rpart"
 
