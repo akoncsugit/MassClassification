@@ -1,27 +1,54 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
-library(shiny)
 library(shinydashboard)
 
-# Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+# server <- function(input, output) {
+#     set.seed(122)
+#     histdata <- rnorm(500)
+#     
+#     output$plot1 <- renderPlot({
+#         data <- histdata[seq_len(input$slider)]
+#         hist(data)
+#     })
+# }
 
-    output$distPlot <- renderPlot({
+# Define server logic for random distribution app ----
+server <- function(input, output) {
 
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+    # Reactive expression to generate the requested distribution ----
+    # This is called whenever the inputs change. The output functions
+    # defined below then use the value computed from this expression
+    d <- reactive({
+        dist <- switch(input$dist,
+                       norm = rnorm,
+                       unif = runif,
+                       lnorm = rlnorm,
+                       exp = rexp,
+                       rnorm)
 
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-
+        dist(input$n)
     })
 
-})
+    # Generate a plot of the data ----
+    # Also uses the inputs to build the plot label. Note that the
+    # dependencies on the inputs and the data reactive expression are
+    # both tracked, and all expressions are called in the sequence
+    # implied by the dependency graph.
+    output$plot <- renderPlot({
+        dist <- input$dist
+        n <- input$n
+
+        hist(d(),
+             main = paste("r", dist, "(", n, ")", sep = ""),
+             col = "#75AADB", border = "white")
+    })
+
+    # Generate a summary of the data ----
+    output$summary <- renderPrint({
+        summary(d())
+    })
+
+    # Generate an HTML table view of the data ----
+    output$table <- renderTable({
+        d()
+    })
+
+}

@@ -1,34 +1,71 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
-library(shiny)
 library(shinydashboard)
 
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
+# ui <- dashboardPage(
+#     dashboardHeader(title = "Basic dashboard"),
+# 
+#     dashboardSidebar(
+#         sidebarMenu(
+#             menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+#             menuItem("Widgets", tabName = "widgets", icon = icon("th"))
+#         )
+#     ),
+# 
+#     dashboardBody(
+#         # Boxes need to be put in a row (or column)
+#         fluidRow(
+#             box(plotOutput("plot1", height = 250)),
+# 
+#             box(
+#                 title = "Controls",
+#                 sliderInput("slider", "Number of observations:", 1, 100, 50)
+#             )
+#         )
+#     )
+# )
 
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
 
-    # Sidebar with a slider input for number of bins
+# Define UI for random distribution app ----
+ui <- fluidPage(theme = shinytheme("superhero"),
+
+    # App title ----
+    titlePanel("Tabsets"),
+    
+
+    # Sidebar layout with input and output definitions ----
     sidebarLayout(
+
+        # Sidebar panel for inputs ----
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
+
+            # Input: Select the random distribution type ----
+            radioButtons("dist", "Distribution type:",
+                         c("Normal" = "norm",
+                           "Uniform" = "unif",
+                           "Log-normal" = "lnorm",
+                           "Exponential" = "exp")),
+
+            # br() element to introduce extra vertical spacing ----
+            br(),
+
+            # Input: Slider for the number of observations to generate ----
+            sliderInput("n",
+                        "Number of observations:",
+                        value = 500,
                         min = 1,
-                        max = 50,
-                        value = 30)
+                        max = 1000)
+
         ),
 
-        # Show a plot of the generated distribution
+        # Main panel for displaying outputs ----
         mainPanel(
-            plotOutput("distPlot")
+
+            # Output: Tabset w/ plot, summary, and table ----
+            tabsetPanel(type = "tabs",
+                        tabPanel("Plot", plotOutput("plot")),
+                        tabPanel("Summary", verbatimTextOutput("summary")),
+                        tabPanel("Table", tableOutput("table"))
+            )
+
         )
     )
-))
+)
