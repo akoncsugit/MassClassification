@@ -16,7 +16,7 @@ install.packages(c())
 # Code to Launch App
 
 ```R
-shiny::runGitHub(repo = "ST558Project3", username = "akoncsugit", ref = "main",
-subdir = "/app/", launch.browser = TRUE)
+shiny::runGitHub(repo = "ST558Project3", username = "akoncsugit",
+ref = "main", subdir = "/app/", launch.browser = TRUE)
 ```
 
