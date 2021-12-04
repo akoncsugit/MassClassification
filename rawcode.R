@@ -9,11 +9,11 @@ library(shinythemes)
 
 
 
-
 mammo_mass <- read_csv("mammographic_masses.csv",
-                        col_names = c("BI-RADS", "Age", "numShape", "numMargin",
+                        col_names = c("BI_RADS", "Age", "numShape", "numMargin",
                                     "numDensity", "numSeverity"), na = "?") %>%
-  mutate("Shape" = cut(numShape, breaks = 4, labels = c("round", "oval",
+  mutate("ID" = c(1:961),
+         "Shape" = cut(numShape, breaks = 4, labels = c("round", "oval",
                                                        "lobular", "irregular")),
          "Margin" = cut(numMargin, breaks = 5,
                         labels = c("circumscribed","microlobulated", "obscured",
@@ -23,34 +23,53 @@ mammo_mass <- read_csv("mammographic_masses.csv",
                                                 "fat-containing"),
                                                 ordered_result = TRUE),
          "Severity" = cut(numSeverity, breaks = 2,
-                          labels = c("benign", "maligant")))
-View(mammo_masses)
-maszzz <-mammo_mass %>% na.omit()
+                          labels = c("benign", "maligant")),
+  )
+
+View(mammo_mass)
+split <-mammo_mass %>% na.omit()
+
+
+table(split$Density, split$Shape)
+table(split$Density, split$Margin)
+table(split$Shape, split$Margin)
 
 
 set.seed(998)
-inTraining <- createDataPartition(m, p = .75, list = FALSE)
-train <- m[ inTraining,]
-test <- m[-inTraining,]
 
+inTraining <- sample(seq_len(nrow(split)), size = floor(0.7 * nrow(split)))
+
+# This will be needed later on when we start modeling
+train<- split[inTraining,] 
+test<- split[-inTraining,]
+
+trainSubset <- train %>% select(ID, Age, Shape, Margin, Density, Severity)
+testSubset <- test %>% select(ID, Age, Shape, Margin, Density, Severity)
 
 m <- mammo_mass %>% na.omit() %>% select(Age, Shape, Margin, Density, Severity)
 n <- mammo_mass %>% na.omit() %>% select(Age, numSeverity)
-summary(glm(Severity ~ (Shape+Margin+Age)^2 + Density + I(Age^2),
-            family = binomial, data = m))
-summary(glm(Severity ~ I(Age^2),family = binomial, data = m))
-summary(glm(Severity ~ Shape*Age + I(Age^2),family = binomial, data = m))
 
-summary(glmFit <- glm(Severity ~ (Shape+Margin+Age)^2 + Density*Age + I(Age^2) +
-                        Density*I(Age^2), family = binomial, data = m))
 
-cv.glm(data =m, glmfit = glmFit, K = 5)
 
-cor <- cor(n[sapply(n, is.numeric)])
+glmFit <- glm(Severity ~ Shape + Margin + Density + Age + Shape:Age +
+                Margin:Age + Density:Age + I(Age^2) + Shape:I(Age^2) +
+                Margin:I(Age^2) + Density:I(Age^2),
+              family = binomial, data = trainSubset)
+summary(glmFit)
+
+fit <- train(Severity ~ Shape + Margin + Density + Age + Shape:Age +
+               Margin:Age + Density:Age + I(Age^2) + Shape:I(Age^2) +
+               Margin:I(Age^2) + Density:I(Age^2), data = trainSubset,
+             method = "glm", family = "binomial", 
+             trControl = trainControl(method = "cv", number = 10))
+
+
+
+cor <- cor(trainSubset[sapply(trainSubset, is.numeric)])
 attributes(cor)$dimnames[[1]] <- c("Age", "Severity")
 attributes(cor)$dimnames[[2]] <- c("Age", "Severity")
 cor
-corrplot::corrplot(cor, )
+corrplot::corrplot(cor)
 
 
 # Base plot
