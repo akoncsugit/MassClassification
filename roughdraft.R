@@ -114,7 +114,7 @@ class <-  train(Severity ~., data = m, method = "rpart",
                 trControl=trCtrl)
 
 rpart.plot(class$finalModel, box.palette="GnRd", nn=TRUE)
-
+ 
 
 ### Save for other projects 
 ###http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/116-mfa-multiple-factor-analysis-in-r-essentials/###

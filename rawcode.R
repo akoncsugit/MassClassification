@@ -1,4 +1,5 @@
 library(tidyverse)
+library(boot)
 library(class)
 library(tree)
 library(caret)
@@ -25,6 +26,14 @@ mammo_mass <- read_csv("mammographic_masses.csv",
                           labels = c("benign", "maligant")))
 View(mammo_masses)
 maszzz <-mammo_mass %>% na.omit()
+
+
+set.seed(998)
+inTraining <- createDataPartition(m, p = .75, list = FALSE)
+train <- m[ inTraining,]
+test <- m[-inTraining,]
+
+
 m <- mammo_mass %>% na.omit() %>% select(Age, Shape, Margin, Density, Severity)
 n <- mammo_mass %>% na.omit() %>% select(Age, numSeverity)
 summary(glm(Severity ~ (Shape+Margin+Age)^2 + Density + I(Age^2),
@@ -32,6 +41,10 @@ summary(glm(Severity ~ (Shape+Margin+Age)^2 + Density + I(Age^2),
 summary(glm(Severity ~ I(Age^2),family = binomial, data = m))
 summary(glm(Severity ~ Shape*Age + I(Age^2),family = binomial, data = m))
 
+summary(glmFit <- glm(Severity ~ (Shape+Margin+Age)^2 + Density*Age + I(Age^2) +
+                        Density*I(Age^2), family = binomial, data = m))
+
+cv.glm(data =m, glmfit = glmFit, K = 5)
 
 cor <- cor(n[sapply(n, is.numeric)])
 attributes(cor)$dimnames[[1]] <- c("Age", "Severity")
