@@ -1,5 +1,7 @@
 library(shinydashboard)
 library(markdown)
+library(shinythemes)
+
 # Define UI for random distribution app ----
 ui <-  navbarPage("Navbar!",
                            theme = shinytheme("superhero"),

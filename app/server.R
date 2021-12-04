@@ -1,6 +1,6 @@
 library(shinydashboard)
 library(markdown)
-
+library(shinythemes)
 
 server <- function(input, output, session) {
     output$plot <- renderPlot({
