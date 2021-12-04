@@ -5,9 +5,8 @@ library(tree)
 library(caret)
 library(rpart)
 library(rpart.plot)
+library(randomForest)
 library(shinythemes)
-
-
 
 mammo_mass <- read_csv("mammographic_masses.csv",
                         col_names = c("BI_RADS", "Age", "numShape", "numMargin",
@@ -43,25 +42,9 @@ inTraining <- sample(seq_len(nrow(split)), size = floor(0.7 * nrow(split)))
 train<- split[inTraining,] 
 test<- split[-inTraining,]
 
-trainSubset <- train %>% select(ID, Age, Shape, Margin, Density, Severity)
-testSubset <- test %>% select(ID, Age, Shape, Margin, Density, Severity)
+trainSubset <- train %>% select(Age, Shape, Margin, Density, Severity)
+testSubset <- test %>% select(Age, Shape, Margin, Density, Severity)
 
-m <- mammo_mass %>% na.omit() %>% select(Age, Shape, Margin, Density, Severity)
-n <- mammo_mass %>% na.omit() %>% select(Age, numSeverity)
-
-
-
-glmFit <- glm(Severity ~ Shape + Margin + Density + Age + Shape:Age +
-                Margin:Age + Density:Age + I(Age^2) + Shape:I(Age^2) +
-                Margin:I(Age^2) + Density:I(Age^2),
-              family = binomial, data = trainSubset)
-summary(glmFit)
-
-fit <- train(Severity ~ Shape + Margin + Density + Age + Shape:Age +
-               Margin:Age + Density:Age + I(Age^2) + Shape:I(Age^2) +
-               Margin:I(Age^2) + Density:I(Age^2), data = trainSubset,
-             method = "glm", family = "binomial", 
-             trControl = trainControl(method = "cv", number = 10))
 
 
 
@@ -109,8 +92,7 @@ dc <- ggplot(m, aes(Severity, Age))
 dc + geom_boxplot(aes(fill = Severity)) + facet_wrap(~Shape)
 
 
-## remove intercept term with -1
-summary(fit)
+
 
 
 #Plot of Quality vs Total sulfur dioxide
@@ -125,42 +107,74 @@ summary(m)
 
 
 
-### Add kNN ###
+
+# ## About Page
+# ∗ Describe the purpose of the app
+# ∗ Briefly discuss the data and its source - providing a link to more information about the data
+# ∗ Tell the user the purpose of each tab (page) of the app
+# ∗ Include a picture related to the data (for instance, if the data was about the world wildlife
+#                                          fund, you might include a picture of their logo)
+# ## Data Exploration Page
+# ∗ Create numerical and graphical summaries
+# ∗ Change the type of plot and type of summary reported
+# ∗ Change the variables and filter the rows to change the data in the plots/summaries
 
 
+## Model Page
+### Modeling Info Tab
 
-# Create a decision tree model
-tree <- rpart(Severity~., data=m, cp=0.0001)
-# Visualize the decision tree with rpart.plot
-rpart.plot(giniFit, box.palette="GnRd", nn=TRUE)
-rpart.plot(tree, box.palette="RdBu", shadow.col="gray", nn=TRUE)
-
-# caret :  method = "rpart"
-
-#option for repeated vs not, number = fold, repeats = )
-
+### Model Fitting Tab
 trCtrl <- trainControl(method = "repeatedcv", number = 5, repeats = 3)
+glmFit <- train(Severity ~ Shape + Margin + Density + Age + Shape:Age +
+                  Margin:Age + Density:Age + I(Age^2) + Shape:I(Age^2) +
+                  Margin:I(Age^2) + Density:I(Age^2), data = trainSubset,
+                method = "glm", family = "binomial", 
+                trControl = trCtrl, preProcess = c("center", "scale"))
 
-rfFit <- train(Severity ~.^2, data = m, method = "rf",
-               trControl=trCtrl,
-               tuneGrid = data.frame(mtry = 1:3))
-
-class <-  train(Severity ~., data = m, method = "rpart",
-                trControl=trCtrl)
+class <-  train(Severity ~ ., data = trainSubset, method = "rpart",
+                trControl=trCtrl, preProcess = c("center", "scale"),
+                tuneGrid = data.frame(cp = seq(0, 0.1, 0.001)))
 
 rpart.plot(class$finalModel, box.palette="GnRd", nn=TRUE)
 
-   
-### Save for other projects 
-###http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/116-mfa-multiple-factor-analysis-in-r-essentials/###
-# u <- m %>% select(Age, Shape, Margin, Density)
-# library(FactoMineR)
-# mf <-MFA(u, group = c(1,1,1,1), type = c("c", "n", "n", "n"))
-# print(mf)
-# library(factoextra)
-# eig.val <- get_eigenvalue(mf)
-# head(eig.val)
-# fviz_screeplot(mf)
-# group <- get_mfa_var(mf, "group")
-# group
-# fviz_mfa_var(mf, "group")
+rfFit <- train(Severity ~ ., data = trainSubset, method = "rf",
+               trControl=trCtrl, preProcess = c("center", "scale"),
+               tuneGrid = data.frame(mtry = 1:15))
+
+
+predglm <- predict(glmFit, newdata = testSubset)
+postResample(predglm, testSubset$Severity)
+confusionMatrix(glmFit, newdata = test)
+
+predclass<-predict(class, newdata = testSubset)
+postResample(predclass, testSubset$Severity)
+confusionMatrix(class, newdata = testSubset)
+confuClass <- confusionMatrix(predclass, testSubset$Severity)
+
+predrf <- predict(rfFit, newdata = testSubset)
+postResample(predrf, testSubset$Severity)
+confuRF <- confusionMatrix(predrf, testSubset$Severity)
+
+Results <-data.frame("kNN" = kNN$overall, "Classification Tree" = class$overall, "Bagged Tree" = bag$overall,
+                     "Random Forest" = rf$overall, "Boosted Tree" = boost$overall)
+
+
+plot(varImp(glmFit), top = 10)
+plot(varImp(rfFit), top = 10)
+plot(varImp(class), top = 10)
+
+
+### Prediction Tab
+newpt <- data.frame(Age = 25, Shape = "oval", Margin = "microlobulated",
+                    Density = "iso")
+
+predict(rfFit, newpt)
+predict(glmFit, newpt)
+predict(class, newpt)
+
+
+# ## Data Page
+# A Data page. The user should be able to
+# ∗ Scroll through the data set
+# ∗ Subset this data set (rows and columns)
+# ∗ Save the (possibly subsetted) data as a file (.csv is fine but whatever you’d like)
