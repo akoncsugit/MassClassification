@@ -23,3 +23,5 @@ massNoNA <- masses %>% na.omit()
 
 massNoNASum <- summary(massNoNA)
 
+g <- ggplot(massNoNA, aes(Severity))
+

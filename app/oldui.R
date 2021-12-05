@@ -12,7 +12,6 @@ ui <-navbarPage("Navbar!", theme = shinytheme("paper"),
                            tabsetPanel(
                              tabPanel("Graphical Summary",
                                       p("p creates a paragraph of text."),
-                                      plotOutput("bar"),
                                       dropdown(
                                         
                                         tags$h6("List of Input"),
