@@ -1,3 +1,28 @@
+newCols <- dummyVars(~Shape + Margin + Density, data = split) %>%
+  predict(newdata = split)
+# add those and remove originals
+mybcKNN<- cbind(split, newCols) %>% mutate("Maligant" = as.factor(numSeverity)) %>%
+  select(-BI_RADS, -numShape,-numMargin, -numDensity, -numSeverity, -Shape,
+         -Margin, -Density, -Severity)
+
+set.seed(101)
+splitForTrain<- createDataPartition(y = mybcKNN$Maligant, p = 0.8, list = FALSE)
+trainKnn <- mybcKNN[splitForTrain, ]
+testKnn <- mybcKNN[-splitForTrain, ]
+
+subTrainKNN <- testKnn %>% select(-ID)
+subTestKNN <- testKnn %>% select(-ID)
+
+
+kNNFit <- train(Maligant ~ ., subTrainKNN, method = "knn",
+                trControl = trainControl(method = "repeatedcv", number = 10,
+                                         repeats = 3),
+                preProcess = c("center", "scale"),
+                tuneGrid = data.frame(k = 1:40))
+kNNFit
+confusionMatrix(kNNFit, newdata = subTestKNN)
+
+
 library(tidyverse)
 library(class)
 library(tree)
