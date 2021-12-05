@@ -30,4 +30,31 @@ server <-function(input, output, session) {
     output$table <- DT::renderDataTable({
         DT::datatable(cars)
     })
+
+    output$downloadPlot <- downloadHandler(
+        filename = "plot.png" ,
+            content = function(file) {
+                png(file = file)
+                p2()
+                dev.off()
+            })
+    
+    output$table <- renderPrint({
+
+        table(input$tablePicker)
+    })
+    output$summmary <- renderPrint({
+        
+        summary(data)
+    })
+    
+    output$downloadData <- downloadHandler(
+          filename = function() {
+            paste('data-', Sys.Date(), '.csv', sep='')
+          },
+          content = function(con) {
+            write.csv(data, con)
+          }
+        )
+    }
 }
