@@ -47,63 +47,62 @@ testSubset <- test %>% select(Age, Shape, Margin, Density, Severity)
 
 
 
+## Proportion Maligant by Age
+## Default Plot
+## Check box to appear
 
-cor <- cor(trainSubset[sapply(trainSubset, is.numeric)])
-attributes(cor)$dimnames[[1]] <- c("Age", "Severity")
-attributes(cor)$dimnames[[2]] <- c("Age", "Severity")
-cor
-corrplot::corrplot(cor)
+data <- train %>% group_by(Age) %>% summarise("Proportion Maligant" = mean(numSeverity), n = n())
+ggplot(data, aes(x = Age, y = `Proportion Maligant`, size = n)) + geom_point(stat = "identity") + ggtitle("Proportion of Maligant Masses by Age") + geom_smooth(method = lm)
 
 
 # Base plot
-g <- ggplot(data = m, aes(x= Severity)) + 
-  xlab("Severity") + ylab("Density")
+g <- ggplot(data = trainSubset, aes(x= Severity)) + 
+  xlab("Severity")
 
-
+g
 
 ################################ KEEP THIS CODE ################################
 
-g <- ggplot(m, aes(Severity))
+
 
 ## one discrete variable
+g <- ggplot(data, aes(Severity))
 d <- g + geom_bar() 
 d + theme_light() 
 d + theme_minimal()
 
 
 # One diescrete filled by another
-df <- ggplot(m, aes(Age, fill = Severity))
-df + geom_bar(position = "dodge")
+df <- ggplot(trainSubset, aes(Age, fill = Severity))
+df + geom_bar(position = "dodge") 
 
 ## two discreate variables
-d2 <- ggplot(ObesityDataSet, aes(as.factor(Diagnosis), Gender))
-d2 + geom_count(aes(shape = Gender))
+d2 <- ggplot(trainSubset, aes(Density, Margin, Severity))
+d2 + geom_count(aes(color = Severity))
 
 
 ## continous one variable
-c <- ggplot(m, aes(Age))
+c <- ggplot(trainSubset, aes(Age))
 c + geom_histogram(binwidth = 5)
 
 
 ### one discrete and one continous variable
-dc <- ggplot(m, aes(Severity, Age))
+dc <- ggplot(trainSubset, aes(Severity, Age))
 
-## Family History
+## Shape
 dc + geom_boxplot(aes(fill = Severity)) + facet_wrap(~Shape)
 
 
 
 
 
-#Plot of Quality vs Total sulfur dioxide
-data <- maszzz %>% group_by(Age) %>% summarise(ProportMaligant = mean(numSeverity), n = n())
-ggplot(data, aes(x = Age, y = ProportMaligant, size = n)) + geom_point(stat = "identity")+
-  ggtitle("QTitle")
+#one-way, two-way, three way
+#Select variables
 
-table(m$Shape, m$Density, m$Severity)
+table(trainSubset$Shape, trainSubset$Density, trainSubset$Severity)
 
-mean(m$Age)
-summary(m)
+mean(trainSubset$Age)
+summary(trainSubset)
 
 
 
@@ -124,19 +123,27 @@ summary(m)
 ### Modeling Info Tab
 
 ### Model Fitting Tab
+
+## number selector 3, 5, 10 folds
+## cross validation repeated or not radio buttons
 trCtrl <- trainControl(method = "repeatedcv", number = 5, repeats = 3)
+
+#Variable selector 
 glmFit <- train(Severity ~ Shape + Margin + Density + Age + Shape:Age +
                   Margin:Age + Density:Age + I(Age^2) + Shape:I(Age^2) +
                   Margin:I(Age^2) + Density:I(Age^2), data = trainSubset,
                 method = "glm", family = "binomial", 
                 trControl = trCtrl, preProcess = c("center", "scale"))
 
+#Default is . or variable selector
 class <-  train(Severity ~ ., data = trainSubset, method = "rpart",
                 trControl=trCtrl, preProcess = c("center", "scale"),
                 tuneGrid = data.frame(cp = seq(0, 0.1, 0.001)))
 
+#Color selection #Save plot
 rpart.plot(class$finalModel, box.palette="GnRd", nn=TRUE)
 
+# mtry selection number slider both ends
 rfFit <- train(Severity ~ ., data = trainSubset, method = "rf",
                trControl=trCtrl, preProcess = c("center", "scale"),
                tuneGrid = data.frame(mtry = 1:15))
@@ -168,6 +175,13 @@ plot(varImp(class), top = 10)
 newpt <- data.frame(Age = 25, Shape = "oval", Margin = "microlobulated",
                     Density = "iso")
 
+upload csv please save the csv column names 
+screen shoot and include image example
+read in csv
+save as data frame
+predict and report back as tible with added column Predicted Severity
+
+allow for individual patient selection
 predict(rfFit, newpt)
 predict(glmFit, newpt)
 predict(class, newpt)
@@ -178,3 +192,8 @@ predict(class, newpt)
 # ∗ Scroll through the data set
 # ∗ Subset this data set (rows and columns)
 # ∗ Save the (possibly subsetted) data as a file (.csv is fine but whatever you’d like)
+
+allow viewing of full mammo_mass file
+describe each row
+allow for subsetting and and filtering
+save created data set as csv
