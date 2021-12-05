@@ -55,38 +55,53 @@ ui <- navbarPage(
                      status = "info",
                      fill = FALSE,
                    ),
-                   awesomeRadio(
-                     inputId = "radioBar",
-                     label = "Select variable for x-axis", 
-                     choices = c("Severity", "Shape", "Margin", "Density"),
-                     selected = "A",
-                     inline = FALSE, 
-                     checkbox = FALSE
-                   ),
-                   pickerInput(inputId = 'xVarPicker',
-                               label = 'X Variable',
-                               choices = c("Severity", "Margin", "Shape", "Density")),
-                   
-                   pickerInput(inputId = 'fillVarPicker',
-                               label = 'Fill Variable',
-                               choices = c("None", "Severity", "Margin", "Shape", "Density"),
-                               selected = "None"),
-                   
-                   pickerInput(inputId = 'facetVarPicker',
-                               label = 'Facet Variable',
-                               choices = c("None", "Severity", "Margin", "Shape", "Density"),
-                               selected = "None"),
-                   
-                   sliderInput(inputId = 'binSlider',
-                               label = 'Bin Width Selector',
-                               value = 5,
-                               min = 0, max = 100)
-                   
+                   # awesomeRadio(
+                   #   inputId = "radioBar",
+                   #   label = "Select variable for x-axis", 
+                   #   choices = c("Severity", "Shape", "Margin", "Density"),
+                   #   selected = "A",
+                   #   inline = FALSE, 
+                   #   checkbox = FALSE
+                   # )
                  ),
                  
                  mainPanel(
                    fluidPage(
+                     tags$h2("Dropdown Button"),
+                     br(),
+                     dropdown(
+                       
+                       tags$h3("Graph Options"),
+                       
+                       pickerInput(inputId = 'xVarPicker',
+                                   label = 'X Variable',
+                                   choices = c("Severity", "Margin", "Shape", "Density"),
+                                   options = list(`style` = "btn-error")),
+                       
+                       pickerInput(inputId = 'fillVarPicker',
+                                   label = 'Fill Variable',
+                                   choices = c("None", "Severity", "Margin", "Shape", "Density"),
+                                   selected = "None",
+                                   options = list(`style` = "btn-error")),
 
+                       pickerInput(inputId = 'facetVarPicker',
+                                   label = 'Facet Variable',
+                                   choices = c("None", "Severity", "Margin", "Shape", "Density"),
+                                   selected = "None",
+                                   options = list(`style` = "btn-error")),
+
+                       sliderInput(inputId = 'binSlider',
+                                   label = 'Binwidth Selector',
+                                   value = 5,
+                                   min = 0, max = 100),
+                       
+                       style = "unite", icon = icon("gear"),
+                       status = "danger", width = "300px",
+                       animate = animateOptions(
+                         enter = animations$fading_entrances$fadeInLeftBig,
+                         exit = animations$fading_exits$fadeOutRightBig
+                       )
+                     ),
                      
                      plotOutput(outputId = 'plot2')
                    )
@@ -98,7 +113,26 @@ ui <- navbarPage(
                  sidebarPanel(
                    h3("Density Plot Panel"),
                    tags$br(),
+                   selectInput(
+                     "selectvar",
+                     label = "Choose a variable to display",
+                     choices = c(
+                       "Basic Montly Salary (Median)" = "basic_monthly_median",
+                       "Fulltime Employment Rate" = "employment_rate_ft_perm"
+                     ),
+                     selected = "basic monthly mean"
+                   ),
                    
+                   checkboxGroupInput(
+                     "checkGroup",
+                     label = "Select University",
+                     choices = list(
+                       "Nanyang Technological University" = "Nanyang Technological University",
+                     ),
+                     selected = list(
+                       "Singapore University of Technology and Design" = "Singapore University of Technology and Design"
+                     )
+                   ),
                  ),
                  mainPanel(
                    h3("Distribution"),
@@ -138,8 +172,8 @@ ui <- navbarPage(
                                    mainPanel(
                                      tabsetPanel(
                                        type = "tabs",
-                                       tabPanel("?", tableOutput("datahead")),
-                                       tabPanel("?", plotOutput(outputId = "piePlot"))
+                                       tabPanel("Ranking", tableOutput("datahead")),
+                                       tabPanel("No. of Graduates", plotOutput(outputId = "piePlot"))
                                      ),
                                    )
                                  ))),

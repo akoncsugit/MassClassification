@@ -5,6 +5,7 @@ library(shinyWidgets)
 
 server <-function(input, output, session) {
     output$bar <- renderPlot ({
+        g <- ggplot(data, aes(Severity))
         g + geom_bar()
         #theme <- paste)
         # if(theme == "gray", )
