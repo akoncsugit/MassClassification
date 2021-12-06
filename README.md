@@ -1,5 +1,7 @@
 # ST558Project3
-ST558 Project 3 Repo
+
+
+The app2 folder is the primary app as of this evening.
 
 # Brief Introduction
 The goal of this app is to classify mammographic masses as either begin or malign.
