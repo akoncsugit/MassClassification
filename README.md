@@ -13,17 +13,12 @@ The prediction of breast cancer biopsy outcomes using two CAD approaches that bo
 Medical Physics 34(11), pp. 4164-4172
 
 # List of Packages
-library(shiny)
-library(shinydashboard)
-library(shinyWidgets)
-library(markdown)
-library(DT)
-library(tidyverse)
+shiny, shinydashboard, markdown, shinyWidgets, markdown, DT, tidyverse
 
 # Code for Installing All the Packages
 
 ```R
-install.packages(c())
+install.packages(c("shiny", "shinydashboard", "markdown", "shinyWidgets", "markdown", "DT", "tidyverse"))
 ```
 
 # Code to Launch App
