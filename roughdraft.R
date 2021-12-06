@@ -74,29 +74,70 @@ g <- ggplot(m, aes(Severity))
 
 ## one discrete variable
 d <- g + geom_bar() 
+
 d + theme_light() 
 d + theme_minimal()
 
 
 # One diescrete filled by another
-df <- ggplot(m, aes(Age, fill = Severity))
-df + geom_bar(position = "dodge")
+
 
 ## two discreate variables
 d2 <- ggplot(ObesityDataSet, aes(as.factor(Diagnosis), Gender))
 d2 + geom_count(aes(shape = Gender))
 
+###
+### HISTOGRAM
 
-## continous one variable
+if histogram(
 c <- ggplot(m, aes(Age))
-c + geom_histogram(binwidth = 5)
+if color select (
+c + geom_histogram(binwidth = 5, aes(fill = Age)) + scale_fill_brewer(palette="Set2")
+)
+
+c + geom_histogram(binwidth = 5, aes(fill = Shape))
+)
+#### 
+#### BOX
+
+if box (
+  dc <- ggplot(m, aes(Severity, Age)) 
+  if color select (
+    if facet wrap(
+    dc + geom_boxplot(aes(fill = Shape)) +
+      facet_wrap(~Margin) + scale_fill_brewer(palette="Set2")
+    ) else (
+      dc + geom_boxplot(aes(fill = Shape)) + scale_fill_brewer(palette="Set2")
+    )
+  ) else (
+    if facet wrap(
+      dc + geom_boxplot(aes(fill = Shape)) + facet_wrap(~Margin)
+    ) else (
+      dc + geom_boxplot(aes(fill = Shape)) 
+    )
+  )
+)   
+
+
+###
+### BAR
+if bar (
+df <- ggplot(m, aes(Shape, fill = Severity))
+
+if color select (
+  df + geom_bar(position = "dodge") + scale_fill_brewer(palette="Set2")
+) else (
+  df + geom_bar(position = "dodge")
+)
+)
 
 
 ### one discrete and one continous variable
 dc <- ggplot(m, aes(Severity, Age))
 
 ## Family History
-dc + geom_boxplot(aes(fill = Severity)) + facet_wrap(~Shape)
+dc + geom_boxplot()
+aes(fill = Severity)) + facet_wrap(~Shape)
 
 
 ## remove intercept term with -1

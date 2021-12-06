@@ -66,14 +66,14 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                                            value = FALSE),
                                               conditionalPanel(condition = "input.switchColors",
                                                              pickerInput(
-                                                               inputId = "plotColorPicker",
+                                                               inputId = "color",
                                                                label = "Select color palate",
                                                                choices = c("Accent", "Dark2",
                                                                            "Paired", "Set1",
                                                                            "Set2", "Set3",
                                                                            "Pastel1", "Pastel2"))),
                                               prettyRadioButtons(
-                                                inputId = "buttonPlotType",
+                                                inputId = "plotType",
                                                 label = "Select plot type:", 
                                                 choices = c("Box", "Histogram", "Bar"),
                                                 selected = "Box",
@@ -82,21 +82,21 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                                 fill = FALSE
                                               ),
 
-                                              pickerInput(inputId = 'fillVarPicker',
+                                              pickerInput(inputId = 'fill',
                                                           label = 'Fill Variable',
                                                           choices = c("Age", "Severity", "Margin", "Shape", "Density"),
                                                           selected = "Severity"
                                                           ),
-                                              conditionalPanel(condition = "input.buttonPlotType == 'Histogram'",
+                                              conditionalPanel(condition = "input.plotType == 'Histogram'",
                                                                sliderInput("histBins", "Number of bins:", 
                                                                            min = 1, max = 50, value = 30),
                                                                numericInput("maxBins", label = "Set Maximum Number of Bins",
                                                                             value = 50, min = 1, max = 100)
                                               ),
                                               
-                                              conditionalPanel(condition = "input.buttonPlotType != 'Histogram'",
+                                              conditionalPanel(condition = "input.plotType != 'Histogram'",
                                                                prettyRadioButtons(
-                                                                 inputId = "radioBar",
+                                                                 inputId = "xaxis",
                                                                  label = "Select variable for x-axis", 
                                                                  choices = c("Severity", "Shape", "Margin", "Density"),
                                                                  selected = "Severity",
@@ -106,8 +106,8 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                                                )
                                               ),
                                               
-                                              conditionalPanel(condition = "input.buttonPlotType == 'Box'",
-                                                               pickerInput(inputId = 'facetVarPicker',
+                                              conditionalPanel(condition = "input.plotType == 'Box'",
+                                                               pickerInput(inputId = 'facet',
                                                                            label = 'Facet Variable',
                                                                            choices = c("Severity", "Margin",
                                                                                        "Shape", "Density"),
@@ -119,6 +119,7 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                               #,downloadButton("downloadPlot", label = "Download Current Plot")
                                        ),
                                        column(9,
+                                              #plotOutput("sumPlot")
                                               plotOutput("distPlot")
                                        )
                                      )
@@ -129,7 +130,7 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                        column(3,
                                               "sidebar",
                                               pickerInput(
-                                                inputId = "tablePicker",
+                                                inputId = "conPick",
                                                 label = "Select Variables for Contigency Table",
                                                 choices = c("Severity", "Margin", "Shape", "Density"),
                                                 multiple = TRUE,
@@ -141,7 +142,7 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                        ),
                                        column(9,
                                               "Contingency Tab",
-                                              #verbatimTextOutput("table"),
+                                              #verbatimTextOutput("con"),
                                               "Summary"#,
                                               #verbatimTextOutput("summary")
                                               )
@@ -158,11 +159,11 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                      fluidRow(
                                        column(4, "sidebar",
                                               knobInput(
-                                                inputId = "knobSplit",
-                                                label = "Split Percentage of Training Data",
-                                                value = 70,
-                                                min = 20,
-                                                max = 80,
+                                                inputId = "percent",
+                                                label = "Training Data Split Ratio",
+                                                value = 0.70,
+                                                min = 0.20,
+                                                max = 0.80,
                                                 displayPrevious = TRUE,
                                                 lineCap = "round",
                                                 fgColor = "#428BCA",
@@ -182,7 +183,7 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                                           max = 30,
                                                           value = 15
                                               ),
-                                              pickerInput("pickerModel",
+                                              pickerInput("modVar",
                                                           "Select desired model predictors",
                                                           choices = c("Shape", "Margin", "Density", "Age",
                                                                       "Shape:Age", "Margin:Age", "Density:Age",
@@ -195,15 +196,19 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                               actionBttn("actionFit", "Fit")
                                        ),
                                        column(8, "main",
-                                              # tableOutput("resultstable"),
+                                              # tableOutput("results"),
                                               # plotOutput("varImpGLM"),
                                               # plotOutput("varImpClass"),
                                               # plotOutput("varImpRF"),
-                                              # plotOutput("rpartPlotClass")
+                                              # plotOutput("rpart")
                                               # plotOutput("plotClass")
                                               )
                                        
                                      )
+  
+                                              
+                                     ),
+                            tabPanel("Results"
                                      ),
                             tabPanel("Predition",
                                      fluidRow(
@@ -216,20 +221,21 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                                            "Shape",
                                                            choices = c("round", "oval", "lobular", "irregular")
                                               ),
-                                              selectInput("preMargin",
+                                              selectInput("predMarg",
                                                            "Margin",
                                                            choices = c("circumscribed","microlobulated", "obscured", "ill-defined",
                                                                        "spiculated")
                                               ),
-                                              selectInput("preDensity",
+                                              selectInput("predDens",
                                                           "Select Density",
                                                           choices = c("high", "iso", "low", "fat-containing")
                                                           ),
 
-                                              actionBttn("prebutton", "Predict")
+                                              actionBttn("predbutton", "Predict")
                                               ),
                                        column(9,
                                               p("A mass with the above is predicted as follows:")
+                                              #uiOutput("prediction")
                                               )
                                      )))
 )
