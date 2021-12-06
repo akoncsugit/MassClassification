@@ -1,140 +1,312 @@
-library(shinydashboard)
-library(markdown)
-library(shinythemes)
+##########################################
+####   Shiny ui                       ####
+##########################################
 library(shinyWidgets)
+library(shiny)
+library(shinyWidgets)
+library(shiny)
+library(plotly)
+library(shinythemes)
+library(DT)
+library(rsconnect)
+# ------------------
+# Main title section
+# ------------------
 
-# Define UI for random distribution app ----
-ui <-navbarPage("Navbar!", theme = shinytheme("paper"),
-                tabPanel("About",includeMarkdown("about.md")
-                         ),
+ui <- navbarPage(
+  "Mammographic Masses",
+  theme = shinytheme("cosmo"),
+  tabPanel(
+    "About",
+    fluidPage(includeMarkdown("about.md"))
 
-                  tabPanel("Data Exploration",
-                           tabsetPanel(
-                             tabPanel("Graphical Summary",
-                                      p("p creates a paragraph of text."),
-                                      plotOutput("bar"),
-                                      dropdown(
-                                        
-                                        tags$h6("List of Input"),
-                                        switchInput(
-                                          inputId = "selectTheme",
-                                          label = "Select Theme?", 
-                                          onLabel = "Yes",
-                                          offLabel = "No",
-                                        ),
-                                        pickerInput(inputId = 'xcol2',
-                                                    label = 'X Variable',
-                                                    choices = names(iris),
-                                                    options = list(`style` = "btn-info")),
-                                        
-                                        pickerInput(inputId = 'ycol2',
-                                                    label = 'Y Variable',
-                                                    choices = names(iris),
-                                                    selected = names(iris)[[2]],
-                                                    options = list(`style` = "btn-warning")),
-                                        
-                                        # sliderInput(inputId = 'clusters2',
-                                        #             label = 'Cluster count',
-                                        #             value = 3,
-                                        #             min = 1, max = 9),
-                                        
-                                        prettyRadioButtons(
-                                          inputId = "Id037",
-                                          label = "Choose:", 
-                                          choices = c("Click me !", "Me !", "Or me !"),
-                                          inline = TRUE, 
-                                          status = "danger",
-                                          fill = TRUE
-                                        ),
-                                        
-                                        style = "unite", icon = icon("gear"),
-                                        status = "danger", width = "300px",
-                                        animate = animateOptions(
-                                          enter = animations$fading_entrances$fadeInLeftBig,
-                                          exit = animations$fading_exits$fadeOutRightBig
-                                        )
-                                      ),
-                                      
-                                      plotOutput("bar"),
-                                      includeMarkdown("about.md")
-                                      ),
-                             tabPanel("Numeric Summary")
-                           )
-                           
+),
+    
 
+  tabPanel("Data Exploration",
+    tabsetPanel(
+      type ="tabs",
+      tabPanel("Graphic Summary",
+               tags$br(),
+               titlePanel(
+                 uiOutput("title")
+               ),
+               sidebarLayout(
+                 sidebarPanel(
 
-                               # p("p creates a paragraph of text."),
-                               # p("A new p() command starts a new paragraph. Supply a style attribute to change the format of the entire paragraph.", style = "font-family: 'times'; font-si16pt"),
-                               # strong("strong() makes bold text."),
-                               # em("em() creates italicized (i.e, emphasized) text."),
-                               # br(),
-                               # code("code displays your text similar to computer code"),
-                               # div("div creates segments of text with a similar style. This division of text is all blue because I passed the argument 'style = color:blue' to div", style = "color:blue"),
-                               # br(),
-                               # p("span does the same thing as div, but it works with",
-                               #   span("groups of words", style = "color:blue"),
-                               #   "that appear inside a paragraph.")
-
-                             ),
-
-                  tabPanel("Model",
-                           sidebarLayout(
-                             sidebarPanel(
-                               radioButtons("plotType", "Plot type",
-                                            c("Scatter"="p", "Line"="l")
-                                            )
-                               ),
-                             mainPanel(
-                               tabsetPanel(
-                                 tabPanel("Model",
-                                          withMathJax(helpText("Some math here $$\\alpha+\\beta$$")),
-                                          includeMarkdown("about.md")),
-                                 tabPanel("Model Fitting",
-                                          plotOutput("plot")),
-                                 tabPanel("Prediction")
-                                 ),
-                               )
-                             )
-                           ),
-# tabPanel("Test",
-#          tabsetPanel("Chicken",
-#            tabPanel(
-#              sidebarLayout(
-#                sidebarPanel(
-#                  radioButtons("plotType", "Plot type", c("Scatter"="p", "Line"="l")
-#                )
-#                ),
-#                mainPanel(includeMarkdown("about.md"))
-#              )
-#            )
-#          ),
-#            tabsetPanel("Bread",
-#                        tabPanel(
-#                          sidebarLayout(
-#                            sidebarPanel(
-#                              radioButtons("plotType", "Plot type", c("HI"="p", "LO"="l")
-#                              )
-#                            ),
-#                            mainPanel(includeMarkdown("about.md"))
-#                          )
-#                        )
-#            )
-# ),
+                   # prettySwitch("switchTheme", label = "Select plot theme?", value = FALSE),
+                   # conditionalPanel(condition = "input.switchTheme",
+                   #                  pickerInput(
+                   #                    inputId = "plotThemePicker",
+                   #                    label = "Select ggplot theme", 
+                   #                    choices = c("gray", "bw", "linedraw", "light", 
+                   #                                "dark", "minimal", "classic", "void"))),
+                   # 
+                   # 
+                   # 
+                   # 
+                   # 
+                   # prettySwitch("switchColors", label = "Select plot color palette?", value = FALSE),
+                   # pickerInput(
+                   #   inputId = "plotColorPicker",
+                   #   label = "Select color palate", 
+                   #   choices = c("Accent", "Dark2", "Paired", "Set1", 
+                   #               "Set2", "Set3", "Pastel1", "Pastel2")
+                   # ),
+                   prettyRadioButtons(
+                     inputId = "buttonPlotType",
+                     label = "Select plot type:", 
+                     choices = c("Bar Plot", "2-D Count", "Histogram", "Box Plot"),
+                     inline = TRUE, 
+                     status = "info",
+                     fill = FALSE,
+                   ),
+                   awesomeRadio(
+                     inputId = "radioBar",
+                     label = "Select variable for x-axis", 
+                     choices = c("Severity", "Shape", "Margin", "Density"),
+                     selected = "A",
+                     inline = FALSE, 
+                     checkbox = FALSE
+                   ),
+                   pickerInput(inputId = 'xVarPicker',
+                               label = 'X Variable',
+                               choices = c("Severity", "Margin", "Shape", "Density")),
+                   
+                   pickerInput(inputId = 'fillVarPicker',
+                               label = 'Fill Variable',
+                               choices = c("None", "Severity", "Margin", "Shape", "Density"),
+                               selected = "None"),
+                   
+                   pickerInput(inputId = 'facetVarPicker',
+                               label = 'Facet Variable',
+                               choices = c("None", "Severity", "Margin", "Shape", "Density"),
+                               selected = "None"),
+ 
+ 
+                     sliderInput("bins", "Number of bins:",
+                                 min = 1, max = 50, value = 30),
+                   
+                     numericInput("maxBins", label = "Set Maximum Number of Bins",
+                                  value = 50, min = 1, max = 100),
 # 
+#                    
+#                    sliderInput(inputId = 'binSlider',
+#                                label = 'Bin Width Selector',
+#                                value = 5,
+#                                min = 0, max = 100),
+
+                   downloadButton("downloadPlot", label = "Download Current Plot")
+                   
+                 ),
+                 
+                 mainPanel(
+                   fluidPage(
+                     uiOutput("title")
 
 
 
+                   )
+               ))
+               ),
+      tabPanel("Numeric Summary",
+               tags$br(),
+               sidebarLayout(
+                 sidebarPanel(
+                   h3("Density Plot Panel"),
+                   tags$br(),
+                   pickerInput(
+                     inputId = "tablePicker",
+                     label = "Select Variables for Contigency Table",
+                     choices = c("Severity", "Margin", "Shape", "Density"),
+                     multiple = TRUE,
+                     options =  list(
+                       "max-options" = 3
+                     )
+                   )
+                   
+                 ),
+                 mainPanel(
+                   verbatimTextOutput("summary"),
+                   verbatimTextOutput("table")
+                 )
+                 
+                 
+                 
+               )),
+      tabPanel("Data Page",
+               tags$br(),
+               sidebarLayout(
+                 sidebarPanel(
+                   switchInput("switchRemoveNA",
+                               label = "Remove NA",
+                               value = FALSE
+                   ),
+                   
+                   h3("Filtering options"),
+                   setSliderColor(c("#2c3e50 ", "#2c3e50"), c(1, 2)),
+                   sliderInput("sliderAgeFilter",
+                     label = "Age Range",
+                     min = 18,
+                     max = 96,
+                     value = c(18, 96)
+                   ),
+                   pickerInput( "selectShapeFilter",
+                                "Select Shape",
+                                choices = c("round", "oval", "lobular", "irregular"),
+                                options = list(
+                                  `actions-box` = TRUE), 
+                                multiple = TRUE
+                   ),
+
+                   pickerInput( "selectMarginFilter",
+                                "Select Margin",
+                     choices = c("circumscribed","microlobulated", "obscured", "ill-defined",
+                                 "spiculated"),
+                     options = list(
+                       `actions-box` = TRUE), 
+                     multiple = TRUE
+                   ),
+                   pickerInput("pickDensityFilter",
+                                "Select Density",
+                                choices = c("high", "iso", "low", "fat-containing"),
+                               options = list(
+                                 `actions-box` = TRUE), 
+                               multiple = TRUE
+                   ),
+
+                   tags$br(),
+
+                h3("Subsetting options"),
+                pickerInput("pickerSubset",
+                            "Select variables for subset",
+                            choices = c("Severity", "Margin", "Shape", "Density"),
+                            options = list(
+                              `actions-box` = TRUE), 
+                            multiple = TRUE
+                ),
+
+                actionButton("actionData", "Apply Selections", class = "btn btn-success"),
+                downloadButton("downloadData", label = "Download Data")
+               ),
+               mainPanel(
+                 tags$br(),
+                 dataTableOutput("myTable"),
+               )
+               ))
+               
+    )
+  ),
+  
+  
+  tabPanel("Modeling",
+           tabsetPanel(
+             type = "tabs",
+             tabPanel("Information",
+                      fluidPage(
+                                 h3("GLM"),
+                                 p("p creates a paragraph of text."),
+                                 withMathJax("$$\\alpha+\\beta$$"),
+                                 tags$br(),
+                                 h3("Classification Tree"),
+                                 p("p creates a paragraph of text."),
+                                 tags$br(),
+                                 h3("Random Forest"),
+                                 p("p creates a paragraph of text."),
+                      )
+                      ),
+             tabPanel("Fitting",
+                      sidebarLayout(
+                                   sidebarPanel(
+                                     knobInput(
+                                       inputId = "knobSplit",
+                                       label = "Split Percentage of Training Data",
+                                       value = 70,
+                                       min = 10,
+                                       max = 90,
+                                       displayPrevious = TRUE,
+                                       lineCap = "round",
+                                       fgColor = "#428BCA",
+                                       inputColor = "#428BCA"
+                                     ),
+                                     numericInput("kfolds", "k-folds for Cross-Validation", 5, min = 5, max = 10
+                                                  , step = 5),
+
+                                     setSliderColor(c("#2c3e50 ", "#2c3e50"), c(1, 2)),
+                                     sliderInput("sliderCP",
+                                                 label = "Complexity Paramater Range",
+                                                 min = 0,
+                                                 max = .5,
+                                                 value = c(0, .5)
+                                     ),
+                                     sliderInput("mtrys",
+                                                 label = "mtry Range",
+                                                 min = 1,
+                                                 max = 30,
+                                                 value = c(1, 30)
+                                     ),
+                                   pickerInput("pickerModel",
+                                               "Select desired model predictors",
+                                               choices = c("Shape", "Margin", "Density", "Age",
+                                                           "Shape:Age", "Margin:Age", "Density:Age",
+                                                           "I(Age^2)", "Shape:I(Age^2)",
+                                                           "Margin:I(Age^2)", "Density:I(Age^2)"),
+                                               options = list(
+                                                 `actions-box` = TRUE), 
+                                               multiple = TRUE),
+                                   
+                                   actionButton("actionFit", "Apply Selections",
+                                                class = "btn btn-success")
+                                   ),
 
 
-                  tabPanel("Data",
-                           sidebarLayout(
-                               sidebarPanel(
-                                   radioButtons("plotType", "Hi",
-                                                c("Scatter"="p", "Line"="l")
+                                     
+                                   mainPanel(
+                                     tabsetPanel(
+                                       type = "tabs",
+                                       tabPanel("GLM",
+                                                
+                                       textOutput("resultsGLM"),
+                                       plotOutput("varImpGLM"),
+                                       tableOutput("resultstableGLM")
+                                       ),
+                                       tabPanel("Classification Tree",
+                                                textOutput("resultsClass"),
+                                                plotOutput("plotClass"),
+                                                plotOutput("varImpClass"),
+                                                plotOutput("rpartPlotClass"),
+                                                tableOutput("resultstableClass")
+                                                ),
+                                       tabPanel("Random Forest", 
+                                                textOutput("resultsClass"),
+                                                plotOutput("varImpRF"),
+                                                tableOutput("resultstableClass")
+                                                )
+                                     ),
                                    )
-                               ),
-                               mainPanel()
-                               )
-                           )
-
-)
+                                 )),
+             tabPanel("Prediction",
+                      tabsetPanel(              sidebarLayout(
+                        sidebarPanel(
+                          h3("Data by Year"),
+                          tags$br(),
+                          selectInput(
+                            "checkYear",
+                            "Select Year",
+                            choices = list("2018", "2017", "2016",
+                                           "2015", "2014", "2013"),
+                            selected = "2018"
+                          )
+                        ),
+                        
+                        mainPanel(
+                          tabsetPanel(
+                            type = "tabs",
+                            tabPanel("Ranking", tableOutput("datahead")),
+                            tabPanel("No. of Graduates", plotOutput(outputId = "piePlot"))
+                          ),
+                        )
+                      )))
+           )
+             )
+           )

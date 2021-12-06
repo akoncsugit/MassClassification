@@ -34,6 +34,10 @@ table(split$Density, split$Margin)
 table(split$Shape, split$Margin)
 
 
+split %>% filter(Age == 50) %>% filter(Shape !="round")
+
+
+
 set.seed(998)
 
 inTraining <- sample(seq_len(nrow(split)), size = floor(0.7 * nrow(split)))
@@ -66,8 +70,8 @@ g
 
 
 ## one discrete variable
-g <- ggplot(data, aes(Severity))
-d <- g + geom_bar() 
+g <- ggplot(data, aes(Severity, Age))
+d <- g + geom_bar(stat = "identity") 
 d + theme_light() 
 d + theme_minimal()
 
@@ -83,7 +87,14 @@ d2 + geom_count(aes(color = Severity))
 
 ## continous one variable
 c <- ggplot(trainSubset, aes(Age))
-c + geom_histogram(binwidth = 5)
+x <-c + geom_histogram(binwidth = 5) + aes(fill = Severity)
+c + geom_histogram(binwidth = 5) + aes(fill = Shape)
+
+x+ scale_fill_brewer(palette="Set2")
+x
+change
+
+c + geom_histogram(aes(y = stat(count) / sum(count), binwidth = 5)) + aes(fill = Severity)
 
 
 ### one discrete and one continous variable
@@ -138,7 +149,8 @@ glmFit <- train(Severity ~ Shape + Margin + Density + Age + Shape:Age +
 #Default is . or variable selector
 class <-  train(Severity ~ ., data = trainSubset, method = "rpart",
                 trControl=trCtrl, preProcess = c("center", "scale"),
-                tuneGrid = data.frame(cp = seq(0, 0.1, 0.001)))
+                tuneGrid = data.frame(cp = seq(0, 0.5, 0.001)))
+plot(class)
 
 #Color selection #Save plot
 rpart.plot(class$finalModel, box.palette="GnRd", nn=TRUE)
@@ -150,20 +162,34 @@ rfFit <- train(Severity ~ ., data = trainSubset, method = "rf",
 
 
 predglm <- predict(glmFit, newdata = testSubset)
-postResample(predglm, testSubset$Severity)
-confusionMatrix(glmFit, newdata = test)
+a <- postResample(predglm, testSubset$Severity)
+
 
 predclass<-predict(class, newdata = testSubset)
-postResample(predclass, testSubset$Severity)
-confusionMatrix(class, newdata = testSubset)
-confuClass <- confusionMatrix(predclass, testSubset$Severity)
+b<- postResample(predclass, testSubset$Severity)
+
+
+
 
 predrf <- predict(rfFit, newdata = testSubset)
-postResample(predrf, testSubset$Severity)
-confuRF <- confusionMatrix(predrf, testSubset$Severity)
+c <- postResample(predrf, testSubset$Severity)
 
-Results <-data.frame("kNN" = kNN$overall, "Classification Tree" = class$overall, "Bagged Tree" = bag$overall,
-                     "Random Forest" = rf$overall, "Boosted Tree" = boost$overall)
+
+
+confuGLM <- confusionMatrix(glmFit, newdata = testSubset)
+confuClass <- confusionMatrix(class, newdata = testSubset)
+confuRF <- confusionMatrix(rfFit, newdata = testSubset)
+
+
+
+
+a
+b
+c
+
+
+Results <-data.frame("GLM" = confuGLM$table, "Classification Tree" = confuClass$table,
+                     "Random Forest" = confuRF$table)
 
 
 plot(varImp(glmFit), top = 10)

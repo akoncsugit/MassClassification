@@ -28,25 +28,13 @@ ui <- navbarPage(
       type ="tabs",
       tabPanel("Graphic Summary",
                tags$br(),
+               titlePanel(
+                 uiOutput("title")
+               ),
                sidebarLayout(
                  sidebarPanel(
-                   h3("Data by Year"),
-                   tags$br(),
-                   prettySwitch("switchTheme", label = "Select plot theme?", value = FALSE),
 
-                   pickerInput(
-                     inputId = "plotThemePicker",
-                     label = "Select ggplot theme", 
-                     choices = c("gray", "bw", "linedraw", "light", 
-                                 "dark", "minimal", "classic", "void")
-                   ),
-                   prettySwitch("switchColors", label = "Select plot color palette?", value = FALSE),
-                   pickerInput(
-                     inputId = "plotColorPicker",
-                     label = "Select color palate", 
-                     choices = c("Accent", "Dark2", "Paired", "Set1", 
-                                 "Set2", "Set3", "Pastel1", "Pastel2")
-                   ),
+
                    prettyRadioButtons(
                      inputId = "buttonPlotType",
                      label = "Select plot type:", 
@@ -55,6 +43,11 @@ ui <- navbarPage(
                      status = "info",
                      fill = FALSE,
                    ),
+                   conditionalPanel(condition = "input.buttonPlotType" == "Histogram",
+                                    checkboxInput(inputId = "rem",
+                                                  label = "Also change symbol based on REM sleep?")),
+
+                   
                    awesomeRadio(
                      inputId = "radioBar",
                      label = "Select variable for x-axis", 
@@ -76,20 +69,30 @@ ui <- navbarPage(
                                label = 'Facet Variable',
                                choices = c("None", "Severity", "Margin", "Shape", "Density"),
                                selected = "None"),
+ 
+ 
+                     sliderInput("bins", "Number of bins:",
+                                 min = 1, max = 50, value = 30),
                    
-                   sliderInput(inputId = 'binSlider',
-                               label = 'Bin Width Selector',
-                               value = 5,
-                               min = 0, max = 100),
+                     numericInput("maxBins", label = "Set Maximum Number of Bins",
+                                  value = 50, min = 1, max = 100),
+# 
+#                    
+#                    sliderInput(inputId = 'binSlider',
+#                                label = 'Bin Width Selector',
+#                                value = 5,
+#                                min = 0, max = 100),
+
                    downloadButton("downloadPlot", label = "Download Current Plot")
                    
                  ),
                  
                  mainPanel(
                    fluidPage(
+                     uiOutput("title")
 
-                     
-                     plotOutput(outputId = 'plot2')
+
+
                    )
                ))
                ),
