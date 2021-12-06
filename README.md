@@ -17,6 +17,6 @@ install.packages(c())
 
 ```R
 shiny::runGitHub(repo = "ST558Project3", username = "akoncsugit",
-ref = "main", subdir = "/app/", launch.browser = TRUE)
+ref = "main", subdir = "/app2/", launch.browser = TRUE)
 ```
 
