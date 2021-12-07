@@ -8,10 +8,11 @@ library(rpart.plot)
 library(randomForest)
 library(shinythemes)
 
-mammo_mass <- read_csv("mammographic_masses.csv",
-                        col_names = c("BI_RADS", "Age", "numShape", "numMargin",
+set.seed(998)
+raw <- read_csv("mammographic_masses.csv",
+                        col_names = c("BI-RADS", "Age", "numShape", "numMargin",
                                     "numDensity", "numSeverity"), na = "?") %>%
-  mutate("ID" = c(1:961),
+  mutate(
          "Shape" = cut(numShape, breaks = 4, labels = c("round", "oval",
                                                        "lobular", "irregular")),
          "Margin" = cut(numMargin, breaks = 5,
@@ -22,23 +23,18 @@ mammo_mass <- read_csv("mammographic_masses.csv",
                                                 "fat-containing"),
                                                 ordered_result = TRUE),
          "Severity" = cut(numSeverity, breaks = 2,
-                          labels = c("benign", "maligant")),
-  )
-
-View(mammo_mass)
-split <-mammo_mass %>% na.omit()
+                          labels = c("benign", "maligant"))
+  ) %>% select(1:2, 7:10)
 
 
-table(split$Density, split$Shape)
-table(split$Density, split$Margin)
-table(split$Shape, split$Margin)
-
-
-split %>% filter(Age == 50) %>% filter(Shape !="round")
+split <- raw %>% na.omit() %>% select(2:6)
 
 
 
-set.seed(998)
+
+
+
+
 
 inTraining <- sample(seq_len(nrow(split)), size = floor(0.7 * nrow(split)))
 
@@ -46,8 +42,16 @@ inTraining <- sample(seq_len(nrow(split)), size = floor(0.7 * nrow(split)))
 train<- split[inTraining,] 
 test<- split[-inTraining,]
 
-trainSubset <- train %>% select(Age, Shape, Margin, Density, Severity)
-testSubset <- test %>% select(Age, Shape, Margin, Density, Severity)
+
+
+
+split %>% filter(Age == 50) %>% filter(Shape !="round")
+
+
+table(raw$Density, raw$Shape, raw$Margin)
+
+
+split used for graphs
 
 
 
@@ -55,15 +59,7 @@ testSubset <- test %>% select(Age, Shape, Margin, Density, Severity)
 ## Default Plot
 ## Check box to appear
 
-data <- train %>% group_by(Age) %>% summarise("Proportion Maligant" = mean(numSeverity), n = n())
-ggplot(data, aes(x = Age, y = `Proportion Maligant`, size = n)) + geom_point(stat = "identity") + ggtitle("Proportion of Maligant Masses by Age") + geom_smooth(method = lm)
 
-
-# Base plot
-g <- ggplot(data = trainSubset, aes(x= Severity)) + 
-  xlab("Severity")
-
-g
 
 ################################ KEEP THIS CODE ################################
 
@@ -142,12 +138,12 @@ trCtrl <- trainControl(method = "repeatedcv", number = 5, repeats = 3)
 #Variable selector 
 glmFit <- train(Severity ~ Shape + Margin + Density + Age + Shape:Age +
                   Margin:Age + Density:Age + I(Age^2) + Shape:I(Age^2) +
-                  Margin:I(Age^2) + Density:I(Age^2), data = trainSubset,
+                  Margin:I(Age^2) + Density:I(Age^2), data = train,
                 method = "glm", family = "binomial", 
                 trControl = trCtrl, preProcess = c("center", "scale"))
 
 #Default is . or variable selector
-class <-  train(Severity ~ ., data = trainSubset, method = "rpart",
+class <-  train(Severity ~ ., data = train, method = "rpart",
                 trControl=trCtrl, preProcess = c("center", "scale"),
                 tuneGrid = data.frame(cp = seq(0, 0.5, 0.001)))
 plot(class)
@@ -156,22 +152,22 @@ plot(class)
 rpart.plot(class$finalModel, box.palette="GnRd", nn=TRUE)
 
 # mtry selection number slider both ends
-rfFit <- train(Severity ~ ., data = trainSubset, method = "rf",
+rfFit <- train(Severity ~ ., data = train, method = "rf",
                trControl=trCtrl, preProcess = c("center", "scale"),
                tuneGrid = data.frame(mtry = 1:15))
 
 
-predglm <- predict(glmFit, newdata = testSubset)
+predglm <- predict(glmFit, newdata = test)
 a <- postResample(predglm, testSubset$Severity)
 
 
-predclass<-predict(class, newdata = testSubset)
-b<- postResample(predclass, testSubset$Severity)
+predclass<-predict(class, newdata = test)
+b<- postResample(predclass, test$Severity)
 
 
 
 
-predrf <- predict(rfFit, newdata = testSubset)
+predrf <- predict(rfFit, newdata = test)
 c <- postResample(predrf, testSubset$Severity)
 
 
@@ -208,12 +204,17 @@ save as data frame
 predict and report back as tible with added column Predicted Severity
 
 allow for individual patient selection
-predict(rfFit, newpt)
-predict(glmFit, newpt)
-predict(class, newpt)
 
+newpt <- c(Age = input$predAge, Shape= input$predShape,
+           Margin = input$predMargin, Density = input$predDens)
 
-# ## Data Page
+a <- predict(glmFit, newpt)
+b <- predict(class, newpt)
+c <- predict(rfFit, newpt)
+
+data.frame(`GLM prediction` = a, `Classification Tree prediction` = b, 
+           `Random Forest Prediction` = c)
+              # ## Data Page
 # A Data page. The user should be able to
 # ∗ Scroll through the data set
 # ∗ Subset this data set (rows and columns)

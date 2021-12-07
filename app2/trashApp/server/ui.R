@@ -3,7 +3,7 @@ library(shinythemes)
 library(shinyWidgets)
 library(markdown)
 
-ui <- navbarPage(theme = shinytheme("slate"),
+ui <- navbarPage(theme = shinytheme("cosmo"),
                  "My Application",
                  tabPanel("About",
                           includeMarkdown("about.md")),
@@ -243,59 +243,58 @@ ui <- navbarPage(theme = shinytheme("slate"),
                                               actionBttn("predbutton", "Predict")
                                               ),
                                        column(9,
-                                              p("A mass with the above is predicted as follows:")
-                                              #uiOutput("prediction")
+                                              uiOutput("ptInfo")
                                               )
                                      )))
 )
 
-# Define server logic required to draw a histogram
-server <- function(input, output, session) {
-  
-  observe({updateSliderInput(session, "histBins", max = input$maxBins)})
-  
-  output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    Age <- faithful[, 2]
-    bins <- seq(min(Age), max(Age), length.out = input$histBins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(Age, breaks = bins, col = 'darkgray', border = 'white')
-  })
-  
-  
-  
-  
-  
-  
-  # Render Filetered data set
-  output$dataf <- renderDataTable({
-    index <- cityinput()
-    if (index == "All"){
-      air_data %>%
-        select(city, date, input$var_selecte) %>%
-        datatable()
-    } else{
-      air_data %>%
-        filter(city==index) %>%
-        select(city, date, input$var_selecte) %>%
-        datatable()
-    }
-  })
-  
-  
-
-  
-  # Download Handler for data frame
-  output$dataDownload <- downloadHandler(
-    filename = function(){
-      paste0("dataframe", ".csv")
-      },
-    content = function(file){
-      write.csv(raw, file)
-      }
-  )
-}
-
-# Run the application 
-shinyApp(ui = ui, server = server)
+# # Define server logic required to draw a histogram
+# server <- function(input, output, session) {
+#   
+#   observe({updateSliderInput(session, "histBins", max = input$maxBins)})
+#   
+#   output$distPlot <- renderPlot({
+#     # generate bins based on input$bins from ui.R
+#     Age <- faithful[, 2]
+#     bins <- seq(min(Age), max(Age), length.out = input$histBins + 1)
+#     
+#     # draw the histogram with the specified number of bins
+#     hist(Age, breaks = bins, col = 'darkgray', border = 'white')
+#   })
+#   
+#   
+#   
+#   
+#   
+#   
+#   # Render Filetered data set
+#   output$dataf <- renderDataTable({
+#     index <- cityinput()
+#     if (index == "All"){
+#       air_data %>%
+#         select(city, date, input$var_selecte) %>%
+#         datatable()
+#     } else{
+#       air_data %>%
+#         filter(city==index) %>%
+#         select(city, date, input$var_selecte) %>%
+#         datatable()
+#     }
+#   })
+#   
+#   
+# 
+#   
+#   # Download Handler for data frame
+#   output$dataDownload <- downloadHandler(
+#     filename = function(){
+#       paste0("dataframe", ".csv")
+#       },
+#     content = function(file){
+#       write.csv(raw, file)
+#       }
+#   )
+# }
+# 
+# # Run the application 
+# shinyApp(ui = ui, server = server)

@@ -165,7 +165,7 @@ tree <- rpart(Severity~., data=m, cp=0.0001)
 # Visualize the decision tree with rpart.plot
 rpart.plot(giniFit, box.palette="GnRd", nn=TRUE)
 rpart.plot(tree, box.palette="RdBu", shadow.col="gray", nn=TRUE)
-
+ 
 # caret :  method = "rpart"
 
 #option for repeated vs not, number = fold, repeats = )

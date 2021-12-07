@@ -43,7 +43,7 @@ dashboardPage(skin = "blue",
                                                 min = 18,
                                                 max = 96,
                                                 value = 40
-                                    ),
+                                    )
                              ),
                              
                              column(4,
@@ -63,8 +63,8 @@ dashboardPage(skin = "blue",
                                                  options = list(
                                                    `actions-box` = TRUE), 
                                                  multiple = TRUE
-                                    ),
-                             ),
+                                    )
+                             )
                            ),
                            fluidRow(
                              column(4,
@@ -74,7 +74,7 @@ dashboardPage(skin = "blue",
                                                 options = list(
                                                   `actions-box` = TRUE), 
                                                 multiple = TRUE
-                                    ),
+                                    )
                              ),
                              column(4,
                                     pickerInput("pickerSubset",
@@ -107,7 +107,7 @@ dashboardPage(skin = "blue",
                                choices = c("Bar", "Box"),
                                inline = TRUE, 
                                status = "info",
-                               fill = FALSE,
+                               fill = FALSE
                              )),
                       column(3,
                              conditionalPanel(condition = "input.buttonPlotType == Box",
@@ -138,7 +138,7 @@ dashboardPage(skin = "blue",
                       column(3,
                              downloadButton("downloadPlot", label = "Download Current Plot")
                       )
-                    ),
+                    )
                   )
                   ),
                   tabItem(tabName = "Tab4",
@@ -153,7 +153,7 @@ dashboardPage(skin = "blue",
                           "max-options" = 3
                         ))
                       ),
-                      column(9,verbatimTextOutput("table")),
+                      column(9,verbatimTextOutput("table"))
                     ),
                     fluidRow(
                       verbatimTextOutput("summary")
@@ -170,13 +170,12 @@ dashboardPage(skin = "blue",
                                     tabPanel("Modeling Info",
                                              fluidRow(
                                                column(width = 4,
-                                                      h1("Generalized Linear Model"),
+                                                      h1("Generalized Linear Model")
                                                       ),
                                          column(width = 4,
-                                                h1("Classification Tree"),)
-                                         ),
+                                                h1("Classification Tree")),
                                          column(width = 4,
-                                                h1("Random Forest"),
+                                                h1("Random Forest")
                                                 )
                                          )
                                              )
@@ -271,7 +270,7 @@ dashboardPage(skin = "blue",
                                                    sliderInput(inputId = 'predAge',
                                                                label = 'Age',
                                                                value = 35,
-                                                               min = 18, max = 100),
+                                                               min = 18, max = 100)
                                           ),
                                           column(3,
                                                  pickerInput( "predShape",
@@ -299,7 +298,7 @@ dashboardPage(skin = "blue",
                                                                `actions-box` = TRUE), 
                                                              multiple = TRUE
                                                  )
-                                                 ),
+                                                 )
                                       
                                           
                                             ),
@@ -316,4 +315,3 @@ dashboardPage(skin = "blue",
                                           ))
                                     )
               )
-)

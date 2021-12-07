@@ -9,69 +9,114 @@ library(class)
 library(tree)
 library(caret)
 library(rpart)
-library(rpart.plot)
+library(rpart.plot) 
 
 server <- function(session, input, output) {
   
   ### about page
   ### data page
-  input$switchRemoveNA
-  input$sliderAgeFilter
-  input$selectShapeFilter
-  selectMarginFilter
-  pickDensityFilter
-  pickerSubset
-  actionData
-  dataDownload  #need download handler
+
+  getRawData <- reactive({ raw })
   
-  render tableOutput "myTable"
-  
-  ### graph page
-  switchColors
-  color
-  plotType
-  fill
-  histBins
-  maxBins
-  xaxis
-  facet
-  
-  
-  downloadPlot #download handler plot
-  
-  output$sumPlot <- renderPlot ({
-    if(input$plotType == "Histogram") {
-      hist <- ggplot(graphData, aes(Age))
-      if(input$switchColors) {
-        hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) +
-          scale_fill_brewer(palette = input$color)
+  filsubDat <- reactive({
+    if(input$filtVar == "Severity") {
+      if(is.null(input$pickerSubset)) {
+        getRawData() %>% filter(Severity == input$filSeverity)
+        } else {
+          getRawData() %>% filter(Severity == input$filSeverity) %>%
+            select(`BI-RADS`, input$pickerSubset, Severity)
+          }
+      } else if(input$filtVar == "Margin"){
+        if(is.null(input$pickerSubset)) {
+          getRawData() %>% filter(Margin == input$filMargin)
+          } else {
+            getRawData() %>% filter(Margin == input$filMargin) %>%
+              select(`BI-RADS`, input$pickerSubset, Severity)
+            }
+        } else if(input$filtVar == "Shape"){
+          if(is.null(input$pickerSubset)) {
+            getRawData() %>% filter(Shape == input$filShape)
+            } else {
+              getRawData() %>% filter(Shape == input$filShape) %>%
+                select(`BI-RADS`, input$pickerSubset, Severity)
+            }
+        } else if(input$filtVar == "Density") { 
+          if(is.null(input$pickerSubset)) {
+          getRawData() %>% filter(Density == input$filDens)
+        } else {
+          getRawData() %>% filter(Density == input$filDens) %>%
+            select(`BI-RADS`, input$pickerSubset, Severity)
+        }
+      } else{
+        if(is.null(input$pickerSubset)) {
+          getRawData()
       } else {
-        hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) 
+        getRawData() %>% select(`BI-RADS`, input$pickerSubset, Severity)
       }
-    } else if (input$plotType == "Bar"){
-      bar <- ggplot(m, aes(input$ fill = Severity))
-      
     }
   })
+
+  output$myTable <- renderDataTable({
+    filsubDat()
+  })
+
+  output$dataDownload <- downloadHandler(
+    filename = function(){
+      paste0("dataframe", ".csv")
+    },
+    content = function(file){
+      write.csv(filsubDat(), file)
+    }
+  )
   
-  
-  
-  
-  ## numeric page
-  
-  render plot "sumPlot"
-  
-  conPick
-  conTab # action button
-  
-  render table "con"
-  render output "summary"
-  
-  ## model info
 
   
+  ### graph page
+  # switchColors
+  # color
+  # plotType
+  # fill
+  # histBins
+  # maxBins
+  # xaxis
+  # facet
+  # 
+  # 
+  # downloadPlot #download handler plot
   
-  ## model fit
+  # output$sumPlot <- renderPlot ({
+  #   if(input$plotType == "Histogram") {
+  #     hist <- ggplot(graphData, aes(Age))
+  #     if(input$switchColors) {
+  #       hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) +
+  #         scale_fill_brewer(palette = input$color)
+  #     } else {
+  #       hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) 
+  #     }
+  #   } else if (input$plotType == "Bar"){
+  #     bar <- ggplot(m, aes(input$ fill = Severity))
+  #     
+  #   }
+  # })
+  
+  
+  
+  
+  # ## numeric page
+  # 
+  # render plot "sumPlot"
+  # 
+  # conPick
+  # conTab # action button
+  # 
+  # render table "con"
+  # render output "summary"
+  # 
+  # ## model info
+  # 
+  # 
+  # 
+  # ## model fit
 
   # Train/Test data split
   moddat <- eventReactive(input$predbutton, {
@@ -86,11 +131,12 @@ server <- function(session, input, output) {
       n <- length(input$modVar)
       temp <- paste0(input$modVar,c(rep("+",n-1),""))
       temp <- paste0(temp, collapse = "")
-      return(formula(paste0('~', temp)))
+      return(formula(temp))
   })
   
-  train <- moddat()[["Train"]]
-  test  <- moddat()[["Test"]]
+  train <- reactive({ moddat()[["Train"]] })
+  test <- reactive({moddat()[["Test"]]})
+
   
   trCtrl <- eventReactive(input$predbutton, {
     trainControl(method = "repeatedcv", number = input$kfolds, repeats = 3)
@@ -98,17 +144,17 @@ server <- function(session, input, output) {
   
   
   glmFit <- eventReactive(input$predbutton, {
-    glmFit <- train(Severity ~ form, data = train, method = "glm", family = "binomial",
+    glmFit <- train(Severity ~ form, data = train(), method = "glm", family = "binomial",
                     trControl = trCtrl())
     })
   
   class <- eventReactive(input$predbutton,{
-    class<- train(Severity ~ form, data = train, method = "rpart", trControl=trCtrl(),
+    class<- train(Severity ~ form, data = train(), method = "rpart", trControl=trCtrl(),
                   tuneGrid = data.frame(cp = seq(0, input$sliderCP, 0.001)))
   })
   
   rfFit <- eventReactive(input$predbutton, {
-    rfFit <-train(Severity ~ form, data = train, method = "rf", trControl=trCtrl(),
+    rfFit <-train(Severity ~ form, data = train(), method = "rf", trControl=trCtrl(),
           tuneGrid = data.frame(mtry = 1:input$mtrys))
   })
  
@@ -140,42 +186,39 @@ server <- function(session, input, output) {
   })
   
   output$confuGLM<- renderPrint({
-    confusionMatrix(glmFit(), newdata = test)
+    confusionMatrix(glmFit(), newdata = test())
   })
   
   output$confuClass <- renderPrint({
-    confusionMatrix(class(), newdata = test)
+    confusionMatrix(class(), newdata = test())
   })
   
   output$confuRF <- renderPrint({
-    confusionMatrix(rfFit(), newdata = test)
+    confusionMatrix(rfFit(), newdata = test())
   })
 
   
-
   output$fitResults <- renderDataTable({
     data.frame("GLM" = confuGLM()$table, "Classification Tree" = confuClass()$table,
                "Random Forest" = confuRF()$table)
   })
   
+  newpt <- reactive({ c(Age = input$predAge, Shape= input$predShape,
+                        Margin = input$predMargin, Density = input$predDens)})
+    
 
 
-  
-  newpt <- c(Age = input$predAge, Shape= input$predShape,
-             Margin = input$predMargin, Density = input$predDens)
-
-
-  output$title <- renderUI({
-    h1(tools::toTitleCase(paste0("Predictions for a mass from a ", input$predAge,
+  output$ptInfo <- renderUI({
+    h3(paste0("Predictions for a mass from a ", input$predAge,
                                  " year old patient of shape: ",
                                  input$predShape, ", density: ", input$predDens, ", and margin: ",
-                                 input$predMarg, ".")))
+                                 input$predMarg, "."))
   })
   
   output$predResults <- renderDataTable({
-    data.frame(`GLM prediction` = predict(glmFit(), newpt),
-               `Classification Tree prediction` = predict(class(), newpt),
-               `Random Forest Prediction` = predict(rfFit(), newpt)
+    data.frame(`GLM prediction` = predict(glmFit(), newpt()),
+               `Classification Tree prediction` = predict(class(), newpt()),
+               `Random Forest Prediction` = predict(rfFit(), newpt())
                )
   })
   
