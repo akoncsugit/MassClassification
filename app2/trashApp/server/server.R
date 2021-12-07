@@ -70,8 +70,8 @@ server <- function(session, input, output) {
   )
   
 
-  
-  ### graph page
+
+  # ### graph page
   # switchColors
   # color
   # plotType
@@ -83,39 +83,53 @@ server <- function(session, input, output) {
   # 
   # 
   # downloadPlot #download handler plot
-  
-  # output$sumPlot <- renderPlot ({
-  #   if(input$plotType == "Histogram") {
-  #     hist <- ggplot(graphData, aes(Age))
-  #     if(input$switchColors) {
-  #       hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) +
-  #         scale_fill_brewer(palette = input$color)
-  #     } else {
-  #       hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) 
-  #     }
-  #   } else if (input$plotType == "Bar"){
-  #     bar <- ggplot(m, aes(input$ fill = Severity))
-  #     
-  #   }
-  # })
-  
-  
-  
-  
+
+  output$sumPlot <- renderPlot ({
+    if(input$plotType == "Histogram") {
+      hist <- ggplot(split, aes(Age))
+      if(input$switchColors){
+        hist + geom_histogram(binwidth = input$histBins, aes(fill = input$fill)) +
+          scale_fill_brewer(palette = input$color) + theme(legend.position="none")
+      } else {
+        hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) +
+          theme(legend.position="none")
+      }
+    } else if (input$plotTye == "Bar") {
+      bar<- ggplot(split, aes(input$xaxis, Age))
+      if(input$switchColors){
+        bar + geom_bar(position = "dodge", aes(fill = input$fill)) + scale_fill_brewer(palette = input$color)
+      } else {
+        bar + geom_bar(position = "dodge", aes(fill = input$fill))
+      }
+      
+    } else if(input$plotType == "Box") {
+      if(input$switchColors){
+        + scale_fill_brewer(palette = input$color)
+      } else {
+        
+      }
+      
+    }
+  })
+
+
+
+
+
   # ## numeric page
-  # 
+  #
   # render plot "sumPlot"
-  # 
+  #
   # conPick
   # conTab # action button
-  # 
+  #
   # render table "con"
   # render output "summary"
-  # 
+  #
   # ## model info
-  # 
-  # 
-  # 
+  #
+  #
+  #
   # ## model fit
 
   # Train/Test data split

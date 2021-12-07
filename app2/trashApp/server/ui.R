@@ -71,38 +71,30 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                      fluidRow(
                                        column(3,
                                               prettySwitch("switchColors",
-                                                           label = "Select plot color palette?",
+                                                           label = "Change color palette?",
                                                            value = FALSE),
-                                              conditionalPanel(condition = "input.switchColors",
-                                                             pickerInput(
-                                                               inputId = "color",
-                                                               label = "Select color palate",
-                                                               choices = c("Accent", "Dark2",
-                                                                           "Paired", "Set1",
-                                                                           "Set2", "Set3",
-                                                                           "Pastel1", "Pastel2"))),
+
                                               prettyRadioButtons(
                                                 inputId = "plotType",
-                                                label = "Select plot type:", 
+                                                label = "Plot Type:", 
                                                 choices = c("Box", "Histogram", "Bar"),
                                                 selected = "Box",
                                                 inline = TRUE, 
                                                 status = "info",
                                                 fill = FALSE
                                               ),
-
-                                              pickerInput(inputId = 'fill',
-                                                          label = 'Fill Variable',
-                                                          choices = c("Age", "Severity", "Margin", "Shape", "Density"),
-                                                          selected = "Severity"
-                                                          ),
+                                              conditionalPanel(condition = "input.switchColors",
+                                                               pickerInput(
+                                                                 inputId = "color",
+                                                                 label = "Color Palatte:",
+                                                                 choices = c("Accent", "Dark2",
+                                                                             "Paired", "Set1",
+                                                                             "Set2", "Set3",
+                                                                             "Pastel1", "Pastel2"))),
                                               conditionalPanel(condition = "input.plotType == 'Histogram'",
-                                                               sliderInput("histBins", "Number of bins:", 
-                                                                           min = 1, max = 50, value = 30),
-                                                               numericInput("maxBins", label = "Set Maximum Number of Bins",
-                                                                            value = 50, min = 1, max = 100)
+                                                               sliderInput("histBins", "Bin Width:", 
+                                                                           min = 1, max = 50, value = 30)
                                               ),
-                                              
                                               conditionalPanel(condition = "input.plotType != 'Histogram'",
                                                                prettyRadioButtons(
                                                                  inputId = "xaxis",
@@ -112,12 +104,17 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                                  inline = TRUE, 
                                                                  status = "info",
                                                                  fill = FALSE
+                                                               ),
+                                                               pickerInput(inputId = 'fill',
+                                                                           label = 'Fill Variable:',
+                                                                           choices = c("Age", "Severity", "Margin", "Shape", "Density"),
+                                                                           selected = "Severity"
                                                                )
                                               ),
                                               
                                               conditionalPanel(condition = "input.plotType == 'Box'",
                                                                pickerInput(inputId = 'facet',
-                                                                           label = 'Facet Variable',
+                                                                           label = "Facet Variable:",
                                                                            choices = c("Severity", "Margin",
                                                                                        "Shape", "Density"),
                                                                            selected = "Margin"
@@ -128,8 +125,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                               #,downloadButton("downloadPlot", label = "Download Current Plot")
                                        ),
                                        column(9,
-                                              #plotOutput("sumPlot")
-                                              plotOutput("distPlot")
+                                              plotOutput("sumPlot")
                                        )
                                      )
                                      
