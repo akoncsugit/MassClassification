@@ -9,7 +9,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                           includeMarkdown("about.md")),
                  tabPanel("Data",
                           fluidRow(
-                            column(3, "sidebar",
+                            column(2,
                                    prettyRadioButtons(
                                      inputId = "filtVar",
                                      label = "Filter Variable",
@@ -61,7 +61,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
 
                                    downloadButton(outputId = "dataDownload", label = "Download Data")
                                    ),
-                            column(9, "main",
+                            column(10,
                                    dataTableOutput("myTable")
                                    )
                             
@@ -166,22 +166,30 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
 
                             tabPanel("Fitting",
                                      fluidRow(
-                                       column(4, "sidebar",
-                                              numericInput("s", "Data Split Ratio", 0.70, min = 0.40, max = 0.80
-                                                           , step = 1),
+                                       column(3,
+                                              prettyRadioButtons(
+                                                inputId = "modSelect",
+                                                label = "Select a model fit",
+                                                choices = c("GLM", "Classification Tree",
+                                                            "Random Forest"), selected = "GLM",
+                                                inline = TRUE, status = "info", fill = FALSE
+                                              )
+                                              ,
+                                              numericInput("percent", "Data Split Ratio", 0.70, min = 0.40, max = 0.80
+                                                           , step = .05),
                                               numericInput("kfolds", "k-folds for Cross-Validation", 5, min = 5, max = 10
                                                            , step = 5),
                                               sliderInput("sliderCP",
                                                           label = "Complexity Paramater Range",
-                                                          min = .1,
-                                                          max = .5,
+                                                          min = .01,
+                                                          max = .1,
                                                           value = .1
                                               ),
                                               sliderInput("mtrys",
                                                           label = "mtry Range",
                                                           min = 2,
-                                                          max = 30,
-                                                          value = 15
+                                                          max = 20,
+                                                          value = 3
                                               ),
                                               pickerInput("modVar",
                                                           "Select desired model predictors",
@@ -197,49 +205,85 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                             `actions-box` = TRUE), 
                                                           multiple = TRUE
                                                           ),
-                                              actionBttn("actionFit", "Fit")
+                                              helpText("See the 'Results' page for additonal output."),
+                                              helpText("Note: Page may take a few seconds to load.")
                                        ),
-                                       column(8, "main",
-                                              textOutput("summaryGLM")
-                                              # tableOutput("results"),
-                                              # plotOutput("varImpGLM"),
-                                              # plotOutput("varImpClass"),
-                                              # plotOutput("varImpRF"),
-                                              # plotOutput("rpart")
-                                              # plotOutput("plotClass")
+                                       column(9,
+                                              verbatimTextOutput("fitSummary")
                                               )
-                                       
                                      )
-  
-                                              
                                      ),
-                            tabPanel("Results"
+                            tabPanel("Results",
+                                     fluidRow(
+                                       column(2,
+                                              prettyRadioButtons(
+                                                inputId = "resultsSelect",
+                                                label = "Select a confusion matrix",
+                                                choices = c("GLM", "Classification Tree",
+                                                            "Random Forest"), selected = "GLM",
+                                                inline = TRUE, status = "info", fill = FALSE
+                                              ),
+                                              helpText("Note: Page may take a few seconds to load.")
+                                              ),
+                                       column(9,
+                                              uiOutput("confuName"),
+                                              verbatimTextOutput("confusion")
+                                              
+                                              )
+                                       ),
+                                     fluidRow(
+                                       column(6,
+                                              h6("Classification Tree Plot"),
+                                              plotOutput("treePlot")
+                                              ),
+                                       column(6,
+                                              h6("Random Forest Variable of Importance Plot"),
+                                              plotOutput("varImpPlot")
+                                              )
+                                     )
                                      ),
                             tabPanel("Predition",
+                                     titlePanel(
+                                       uiOutput("ptInfo")
+                                     ),
                                      fluidRow(
                                        column(3,
                                               numericInput(inputId = 'predAge',
                                                           label = 'Age',
                                                           value = 35,
                                                           min = 18, max = 100),
-                                              selectInput( "predShape",
+                                              selectInput("predShape",
                                                            "Shape",
-                                                           choices = c("round", "oval", "lobular", "irregular")
+                                                           choices = c("round", "oval", "lobular",
+                                                                       "irregular"),
+                                                           selected = "round"
                                               ),
                                               selectInput("predMarg",
                                                            "Margin",
-                                                           choices = c("circumscribed","microlobulated", "obscured", "ill-defined",
-                                                                       "spiculated")
+                                                           choices = c("circumscribed",
+                                                                       "microlobulated",
+                                                                       "obscured", "ill-defined",
+                                                                       "spiculated"),
+                                                          selected = "circumscribed"
                                               ),
                                               selectInput("predDens",
                                                           "Select Density",
-                                                          choices = c("high", "iso", "low", "fat-containing")
+                                                          choices = c("high", "iso", "low",
+                                                                      "fat-containing"),
+                                                          selected = "high"
                                                           ),
-
-                                              actionBttn("predbutton", "Predict")
                                               ),
-                                       column(9,
-                                              uiOutput("ptInfo")
-                                              )
+                                       column(3,
+                                              h6("GLM Prediction"),
+                                              verbatimTextOutput("predResGLM"),
+                                              ),
+                                       column(3,
+                                            h6("Classification Tree Prediction"),
+                                             verbatimTextOutput("predResCla")
+                                             ),
+                                       column(3,
+                                            h6("Random Forest Prediction"),
+                                             verbatimTextOutput("predResRF")
+                                       )
                                      )))
 )

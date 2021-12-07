@@ -120,104 +120,115 @@ server <- function(session, input, output) {
 
   # Train/Test data split
   moddat <- reactive({
-    index <- sample(seq_len(nrow(split)), size = floor(.7*nrow(split)))
+    index <- sample(seq_len(nrow(split)), size = floor(input$percent*nrow(split)))
     train <- split[index,]
     test <- split[-index,]
     return(list(Train=train, Test=test))
   })
 
   form <- reactive({
-
+    formula((gsub(" ", "+", paste("Severity", paste0(input$modVar, collapse = " "), sep = "~"))))
   })
-  
   
 
   
   trCtrl <- reactive({
-    trainControl(method = "repeatedcv", number = 3, repeats = 2)
+    trainControl(method = "repeatedcv", number = input$kfolds, repeats = 3)
   })
   
-  # glmFit <- train(form = Severity ~ ., data = train, method = "glm", family = "binomial",
-  #                 trControl = trCtrl)
-  # 
+
   glmFit <- reactive({
-   train(Severity ~ input$modVar, data = moddat()[["Train"]], method = "glm", family = "binomial",
+   train(form(), data = moddat()[["Train"]], method = "glm", family = "binomial",
          trControl = trCtrl())
     })
   
-  # class <- eventReactive(input$actionFit,{
-  #   class<- train(Severity ~ form, data = train(), method = "rpart", trControl=trCtrl(),
-  #                 tuneGrid = data.frame(cp = seq(0, input$sliderCP, 0.001)))
-  # })
-  
-  # rfFit <- eventReactive(input$actionFit, {
-  #   rfFit <-train(Severity ~ form, data = train(), method = "rf", trControl=trCtrl(),
-  #         tuneGrid = data.frame(mtry = 1:input$mtrys))
-  # })
-  # 
-  
-  output$summaryGLM <- renderPrint({
-    summary(glmFit())
-    # if (input$predbutton){
-    #   summary(glmFit())
-    # }
+  class <- reactive({
+  train(form(), data =  moddat()[["Train"]], method = "rpart", trControl=trCtrl(),
+        tuneGrid = data.frame(cp = seq(0, input$sliderCP, 0.001)))
   })
   
-  # output$resultsRF <- renderPrint({
-  #   if (input$predbutton){
-  #   rfFit()
-  #   }
-  # })
-  # 
-  # output$resultsRF <- renderPrint({
-  #   if (input$predbutton){
-  #   class()
-  #   }
-  # })
-  # 
-  # output$varImp <- renderPlot({
-  #   plot(varImp(rfFit()), top = 10)
-  # })
-  # 
-  # output$classPlot <- renderPlot({
-  #   rpart.plot(class()$finalModel, box.palette="GnRd", nn=TRUE)
-  # })
-  # 
-  # output$confuGLM<- renderPrint({
-  #   confusionMatrix(glmFit(), newdata = test())
-  # })
-  # 
-  # output$confuClass <- renderPrint({
-  #   confusionMatrix(class(), newdata = test())
-  # })
-  # 
-  # output$confuRF <- renderPrint({
-  #   confusionMatrix(rfFit(), newdata = test())
-  # })
-  # 
-  # 
-  # output$fitResults <- renderDataTable({
-  #   data.frame("GLM" = confuGLM()$table, "Classification Tree" = confuClass()$table,
-  #              "Random Forest" = confuRF()$table)
-  # })
-  
-  newpt <- reactive({ c(Age = input$predAge, Shape= input$predShape,
-                        Margin = input$predMargin, Density = input$predDens)})
-    
+  rfFit <- reactive({
+    train(form(), data =  moddat()[["Train"]], method = "rf", trControl=trCtrl(),
+          tuneGrid = data.frame(mtry = 1:input$mtrys))
+  })
 
+
+  output$fitSummary <- renderPrint({
+    if(input$modSelect == "GLM") {
+      summary(glmFit())
+    } else if(input$modSelect == "Classification Tree") {
+      class()
+    } else if(input$modSelect == "Random Forest"){
+      rfFit()
+    }
+  })
+  
+  # output$confusion <- renderPrint({
+  #   if(input$resultsSelect == "GLM"){
+  #     if(input$glmResults == "Prediction Confusion Matrix"){
+  #       confusionMatrix(glmFit(), newdata = moddat()[["Test"]])
+  #     } else if(input$cglmResults == "Accuracy"){
+  #       glmFit()
+  #     }
+  #   } else if(input$resultsSelect == "Classification Tree") {
+  #     if(input$classResults == "Prediction Confusion Matrix") {
+  #       confusionMatrix(class(), newdata = moddat()[["Test"]])
+  #     }
+  #   }else if(input$resultsSelect == "Random Forest") {
+  #     confusionMatrix(rfFit(), newdata = moddat()[["Test"]])
+  #   }
+  # })
+  # 
+  
+  output$confuName <- renderUI({
+    h6(tools::toTitleCase(paste0("Test Prediction Confusion Matrix for the ",
+                                 input$resultsSelect, " model.")))
+  })
+  
+  
+  output$confusion <- renderPrint({
+    if(input$resultsSelect == "GLM"){
+      confusionMatrix(glmFit(), newdata = moddat()[["Test"]])
+    } else if (input$resultsSelect == "Classification Tree") {
+      confusionMatrix(class(), newdata = moddat()[["Test"]])
+    } else if(input$resultsSelect == "Random Forest"){
+      confusionMatrix(rfFit(), newdata = moddat()[["Test"]])
+    }
+  })
+
+  
+  
+  output$treePlot <- renderPlot({
+    rpart.plot(class()$finalModel, box.palette="GnRd", nn=TRUE)
+  })
+  output$varImpPlot <- renderPlot({
+    plot(varImp(rfFit()), top = 10)
+  })
+  
 
   output$ptInfo <- renderUI({
-    h3(paste0("Predictions for a mass from a ", input$predAge,
-                                 " year old patient of shape: ",
+    h3(strong(paste0("Predictions for a mass from a ", input$predAge,
+                                 " year old patient with shape: ",
                                  input$predShape, ", density: ", input$predDens, ", and margin: ",
-                                 input$predMarg, "."))
+                                 input$predMarg, ".")))
   })
   
-  output$predResults <- renderDataTable({
-    data.frame(`GLM prediction` = predict(glmFit(), newpt()),
-               `Classification Tree prediction` = predict(class(), newpt()),
-               `Random Forest Prediction` = predict(rfFit(), newpt())
-               )
+  
+  output$predResGLM <- renderPrint({
+    predict(glmFit(),  data.frame(Age = input$predAge, Shape = input$predShape,
+                                  Margin = input$predMarg, Density = input$predDens))
   })
   
+  output$predResCla<- renderPrint({
+    predict(class(), data.frame(Age = input$predAge, Shape = input$predShape,
+                                Margin = input$predMarg, Density = input$predDens))
+  })
+  
+  output$predResRF <- renderPrint({
+    predict(rfFit(), data.frame(Age = input$predAge, Shape= input$predShape,
+                             Margin = input$predMarg, Density = input$predDens))
+  })
+  
+
+
  }
