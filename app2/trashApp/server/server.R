@@ -119,89 +119,87 @@ server <- function(session, input, output) {
   # ## model fit
 
   # Train/Test data split
-  moddat <- eventReactive(input$predbutton, {
-    ratio <- input$percent/100
-    index <- sample(seq_len(nrow(split)), size = floor(ratio*nrow(split)))
+  moddat <- reactive({
+    index <- sample(seq_len(nrow(split)), size = floor(.7*nrow(split)))
     train <- split[index,]
     test <- split[-index,]
     return(list(Train=train, Test=test))
   })
 
-  form <- eventReactive(input$predbutton, {
-      n <- length(input$modVar)
-      temp <- paste0(input$modVar,c(rep("+",n-1),""))
-      temp <- paste0(temp, collapse = "")
-      return(formula(temp))
+  form <- reactive({
+
   })
   
-  train <- reactive({ moddat()[["Train"]] })
-  test <- reactive({moddat()[["Test"]]})
+  
 
   
-  trCtrl <- eventReactive(input$predbutton, {
-    trainControl(method = "repeatedcv", number = input$kfolds, repeats = 3)
+  trCtrl <- reactive({
+    trainControl(method = "repeatedcv", number = 3, repeats = 2)
   })
   
-  
-  glmFit <- eventReactive(input$predbutton, {
-    glmFit <- train(Severity ~ form, data = train(), method = "glm", family = "binomial",
-                    trControl = trCtrl())
+  # glmFit <- train(form = Severity ~ ., data = train, method = "glm", family = "binomial",
+  #                 trControl = trCtrl)
+  # 
+  glmFit <- reactive({
+   train(Severity ~ input$modVar, data = moddat()[["Train"]], method = "glm", family = "binomial",
+         trControl = trCtrl())
     })
   
-  class <- eventReactive(input$predbutton,{
-    class<- train(Severity ~ form, data = train(), method = "rpart", trControl=trCtrl(),
-                  tuneGrid = data.frame(cp = seq(0, input$sliderCP, 0.001)))
-  })
+  # class <- eventReactive(input$actionFit,{
+  #   class<- train(Severity ~ form, data = train(), method = "rpart", trControl=trCtrl(),
+  #                 tuneGrid = data.frame(cp = seq(0, input$sliderCP, 0.001)))
+  # })
   
-  rfFit <- eventReactive(input$predbutton, {
-    rfFit <-train(Severity ~ form, data = train(), method = "rf", trControl=trCtrl(),
-          tuneGrid = data.frame(mtry = 1:input$mtrys))
-  })
- 
+  # rfFit <- eventReactive(input$actionFit, {
+  #   rfFit <-train(Severity ~ form, data = train(), method = "rf", trControl=trCtrl(),
+  #         tuneGrid = data.frame(mtry = 1:input$mtrys))
+  # })
+  # 
   
   output$summaryGLM <- renderPrint({
-    if (input$predbutton){
-      summary(glmFit())
-    }
+    summary(glmFit())
+    # if (input$predbutton){
+    #   summary(glmFit())
+    # }
   })
   
-  output$resultsRF <- renderPrint({
-    if (input$predbutton){
-    rfFit()
-    }
-  })
-  
-  output$resultsRF <- renderPrint({
-    if (input$predbutton){
-    class()
-    }
-  })
-  
-  output$varImp <- renderPlot({
-    plot(varImp(rfFit()), top = 10)
-  })
-  
-  output$classPlot <- renderPlot({
-    rpart.plot(class()$finalModel, box.palette="GnRd", nn=TRUE)
-  })
-  
-  output$confuGLM<- renderPrint({
-    confusionMatrix(glmFit(), newdata = test())
-  })
-  
-  output$confuClass <- renderPrint({
-    confusionMatrix(class(), newdata = test())
-  })
-  
-  output$confuRF <- renderPrint({
-    confusionMatrix(rfFit(), newdata = test())
-  })
-
-  
-  output$fitResults <- renderDataTable({
-    data.frame("GLM" = confuGLM()$table, "Classification Tree" = confuClass()$table,
-               "Random Forest" = confuRF()$table)
-  })
+  # output$resultsRF <- renderPrint({
+  #   if (input$predbutton){
+  #   rfFit()
+  #   }
+  # })
+  # 
+  # output$resultsRF <- renderPrint({
+  #   if (input$predbutton){
+  #   class()
+  #   }
+  # })
+  # 
+  # output$varImp <- renderPlot({
+  #   plot(varImp(rfFit()), top = 10)
+  # })
+  # 
+  # output$classPlot <- renderPlot({
+  #   rpart.plot(class()$finalModel, box.palette="GnRd", nn=TRUE)
+  # })
+  # 
+  # output$confuGLM<- renderPrint({
+  #   confusionMatrix(glmFit(), newdata = test())
+  # })
+  # 
+  # output$confuClass <- renderPrint({
+  #   confusionMatrix(class(), newdata = test())
+  # })
+  # 
+  # output$confuRF <- renderPrint({
+  #   confusionMatrix(rfFit(), newdata = test())
+  # })
+  # 
+  # 
+  # output$fitResults <- renderDataTable({
+  #   data.frame("GLM" = confuGLM()$table, "Classification Tree" = confuClass()$table,
+  #              "Random Forest" = confuRF()$table)
+  # })
   
   newpt <- reactive({ c(Age = input$predAge, Shape= input$predShape,
                         Margin = input$predMargin, Density = input$predDens)})

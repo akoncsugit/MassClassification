@@ -167,17 +167,8 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                             tabPanel("Fitting",
                                      fluidRow(
                                        column(4, "sidebar",
-                                              knobInput(
-                                                inputId = "percent",
-                                                label = "Training Data Split Percentage",
-                                                value = 70,
-                                                min = 20,
-                                                max = 80,
-                                                displayPrevious = TRUE,
-                                                lineCap = "round",
-                                                fgColor = "#428BCA",
-                                                inputColor = "#428BCA"
-                                              ),
+                                              numericInput("s", "Data Split Ratio", 0.70, min = 0.40, max = 0.80
+                                                           , step = 1),
                                               numericInput("kfolds", "k-folds for Cross-Validation", 5, min = 5, max = 10
                                                            , step = 5),
                                               sliderInput("sliderCP",
@@ -198,6 +189,10 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                                       "Shape:Age", "Margin:Age", "Density:Age",
                                                                       "I(Age^2)", "Shape:I(Age^2)",
                                                                       "Margin:I(Age^2)", "Density:I(Age^2)"),
+                                                          selected = c("Shape", "Margin", "Density", "Age",
+                                                                       "Shape:Age", "Margin:Age", "Density:Age",
+                                                                       "I(Age^2)", "Shape:I(Age^2)",
+                                                                       "Margin:I(Age^2)", "Density:I(Age^2)"),
                                                           options = list(
                                                             `actions-box` = TRUE), 
                                                           multiple = TRUE
@@ -205,6 +200,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                               actionBttn("actionFit", "Fit")
                                        ),
                                        column(8, "main",
+                                              textOutput("summaryGLM")
                                               # tableOutput("results"),
                                               # plotOutput("varImpGLM"),
                                               # plotOutput("varImpClass"),
@@ -247,54 +243,3 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                               )
                                      )))
 )
-
-# # Define server logic required to draw a histogram
-# server <- function(input, output, session) {
-#   
-#   observe({updateSliderInput(session, "histBins", max = input$maxBins)})
-#   
-#   output$distPlot <- renderPlot({
-#     # generate bins based on input$bins from ui.R
-#     Age <- faithful[, 2]
-#     bins <- seq(min(Age), max(Age), length.out = input$histBins + 1)
-#     
-#     # draw the histogram with the specified number of bins
-#     hist(Age, breaks = bins, col = 'darkgray', border = 'white')
-#   })
-#   
-#   
-#   
-#   
-#   
-#   
-#   # Render Filetered data set
-#   output$dataf <- renderDataTable({
-#     index <- cityinput()
-#     if (index == "All"){
-#       air_data %>%
-#         select(city, date, input$var_selecte) %>%
-#         datatable()
-#     } else{
-#       air_data %>%
-#         filter(city==index) %>%
-#         select(city, date, input$var_selecte) %>%
-#         datatable()
-#     }
-#   })
-#   
-#   
-# 
-#   
-#   # Download Handler for data frame
-#   output$dataDownload <- downloadHandler(
-#     filename = function(){
-#       paste0("dataframe", ".csv")
-#       },
-#     content = function(file){
-#       write.csv(raw, file)
-#       }
-#   )
-# }
-# 
-# # Run the application 
-# shinyApp(ui = ui, server = server)
