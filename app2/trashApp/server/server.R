@@ -1,13 +1,20 @@
+########################################################################;
+#Author:  Ashley Ko                                                     ;
+#Title: ST558 Project 3 server                                          ;
+#Program Purpose: To complete ST558 project 3 requirements              ;
+#Date: 2021/12/05                                                       ;
+########################################################################;
 
+
+library(caret)
+library(rpart.plot) 
 # library(markdown)
 # library(rlang)
-
 # library(boot)
 # library(class)
 # library(tree)
-# library(caret)
 # library(rpart)
-# library(rpart.plot) 
+
 
 server <- function(session, input, output) {
   
@@ -239,22 +246,7 @@ server <- function(session, input, output) {
     }
   })
   
-  # output$confusion <- renderPrint({
-  #   if(input$resultsSelect == "GLM"){
-  #     if(input$glmResults == "Prediction Confusion Matrix"){
-  #       confusionMatrix(glmFit(), newdata = moddat()[["Test"]])
-  #     } else if(input$cglmResults == "Accuracy"){
-  #       glmFit()
-  #     }
-  #   } else if(input$resultsSelect == "Classification Tree") {
-  #     if(input$classResults == "Prediction Confusion Matrix") {
-  #       confusionMatrix(class(), newdata = moddat()[["Test"]])
-  #     }
-  #   }else if(input$resultsSelect == "Random Forest") {
-  #     confusionMatrix(rfFit(), newdata = moddat()[["Test"]])
-  #   }
-  # })
-  # 
+
   
   output$confuName <- renderUI({
     h6(tools::toTitleCase(paste0("Test Prediction Confusion Matrix for the ",
@@ -263,7 +255,7 @@ server <- function(session, input, output) {
   
   
   output$confusion <- renderPrint({
-    if(input$resultsSelect == "GLM"){
+    if(input$resultsSelect == "Generalized Linear"){
       confusionMatrix(glmFit(), newdata = moddat()[["Test"]])
     } else if (input$resultsSelect == "Classification Tree") {
       confusionMatrix(class(), newdata = moddat()[["Test"]])

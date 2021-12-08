@@ -1,5 +1,10 @@
-#global.R
-#
+########################################################################;
+#Author:  Ashley Ko                                                     ;
+#Title: ST558 Project 3 global environment helper                       ;
+#Program Purpose: To complete ST558 project 3 requirements              ;
+#Date: 2021/12/05                                                       ;
+########################################################################;
+
 
 library(tidyverse)
 
