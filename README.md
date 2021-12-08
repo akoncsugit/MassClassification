@@ -44,6 +44,6 @@ install.packages(c("caret", "DT", "rpart.plot", "shiny", "shinythemes, "shinyWid
 
 ```R
 shiny::runGitHub(repo = "ST558Project3", username = "akoncsugit",
-ref = "main", subdir = "/appProject3/", launch.browser = TRUE)
+ref = "main", subdir = "/app/", launch.browser = TRUE)
 ```
 
