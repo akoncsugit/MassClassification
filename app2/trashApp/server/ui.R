@@ -14,11 +14,9 @@ library(shinyWidgets)
 # Establishes a navbar page ui
 ui <- navbarPage(theme = shinytheme("flatly"),
                  "Mammographic Mass Classification",
-
                  # About page panel
                  tabPanel("About",
                           includeMarkdown("about.md")),
-
                  # Data page panel
                  tabPanel("Data",
                           fluidRow(
@@ -31,7 +29,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                  "Shape", "Density"), selected = "None",
                                      inline = TRUE, status = "info", fill = FALSE
                                      ),
-
                                    # Conditonal Panel for selecting variable levels for filtering
                                    # data based on previously selected filter variable Severity
                                    conditionalPanel(condition = "input.filtVar == 'Severity'",
@@ -41,7 +38,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                 selected = "maligant"
                                                     )
                                    ),
-
                                    # Conditonal Panel for selecting variable levels for filtering
                                    # data based on previously selected filter variable Margin
                                    conditionalPanel(condition = "input.filtVar == 'Margin'",
@@ -55,7 +51,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                 selected = "circumscribed"
                                                     )
                                    ),
-
                                    # Conditonal Panel for selecting variable levels for filtering
                                    # data based on previously selected filter variable Shape
                                    conditionalPanel(condition = "input.filtVar == 'Shape'",
@@ -66,7 +61,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                 selected = "round"
                                                     )
                                    ),
-
                                    # Conditonal Panel for selecting variable levels for filtering 
                                    # data based on previously selected filter variable Density
                                    conditionalPanel(condition = "input.filtVar == 'Density'",
@@ -77,7 +71,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                 selected = "high"
                                                     )
                                    ),
-
                                    # Picker Input for selecting subseting variable
                                    pickerInput("pickerSubset",
                                                "Select variables for subset:",
@@ -85,7 +78,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                selected = "Age",
                                                multiple = TRUE
                                                ),
-
                                    # Button which prompts download handeler to render a csv file
                                   downloadButton(outputId = "dataDownload", label = "Download Data")
                                    ),
@@ -97,7 +89,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                           )),
                  # Data Exploration page panel
                  navbarMenu("Data Exploration",
-                            
+
                             # Graphical Summary tab
                             tabPanel("Graphical Summary",
                                      fluidRow(
@@ -106,7 +98,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                               prettySwitch("switchColors",
                                                            label = "Change color palette?",
                                                            value = FALSE),
-
                                               # Radio Button to allow for plot type selection
                                               prettyRadioButtons(
                                                 inputId = "plotType",
@@ -128,7 +119,6 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                              "Set2", "Set3",
                                                                              "Pastel1", "Pastel2"))
                                                                ),
-                                              
                                               # Conditional Panel that displays bin width for the
                                               #  histogram
                                               conditionalPanel(condition = "input.plotType == 
@@ -137,6 +127,8 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                            min = 1, max = 50,
                                                                            value = 30)
                                               ),
+                                              # Conditional Panel that plot options for bar and box
+                                              # plots (x variable and fill variable)
                                               conditionalPanel(condition = "input.plotType != 
                                                                'Histogram'",
                                                                prettyRadioButtons(
@@ -159,7 +151,8 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                            selected = "Severity"
                                                                )
                                               ),
-                                              
+                                              # Condional panel that renders options for 
+                                              # facet selection for Box plot
                                               conditionalPanel(condition = "input.plotType == 
                                                                'Box'",
                                                                pickerInput(inputId = 'facet',
@@ -174,14 +167,18 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                               )
                                        ),
                                        column(9,
+                                              # Renders custom plot
                                               plotOutput("sumPlot")
                                        )
                                      )
                                      
                                      ),
+                            # Tab panel for numeric summary
                             tabPanel("Numeric Summary",
                                      fluidRow(
                                        column(3,
+                                              # Radio Buttons for selecting type of contigency
+                                              # table
                                               prettyRadioButtons(
                                                 inputId = "editConTab",
                                                 label = "Edit contingency table:", 
@@ -191,6 +188,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                 status = "info",
                                                 fill = FALSE
                                               ),
+                                              # Conditional Panel for one-way table, variable picker
                                               conditionalPanel(condition = "input.editConTab ==
                                                                'One-Way'",
                                                                pickerInput(inputId = 'oneWay',
@@ -203,6 +201,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                            selected = "Margin"
                                                                )
                                               ),
+                                              # Conditional Panel for two-way table, variable picker
                                               conditionalPanel(condition = "input.editConTab == 
                                                                'Two-Way'",
                                                                pickerInput(inputId = 'twoWay',
@@ -214,7 +213,8 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                         selected = "Severity|Shape"
                                                                )
                                               ),
-                                       conditionalPanel(condition = "input.editConTab == 
+                                              # Conditional Panel for 3-way table, variable picker
+                                              conditionalPanel(condition = "input.editConTab == 
                                                         'Three-Way'",
                                                         pickerInput(inputId = 'threeWay',
                                                                     label = "Select two-way 
@@ -227,29 +227,33 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                selected = "Margin|Density|Severity"
                                                         )
                                               )
-
                                        ),
                                        column(9,
                                               "Contingency Table",
+                                              # Displays contingency table results
                                               verbatimTextOutput("conTab"),
                                               "Simple Summary",
+                                              # Displays simple data summary
                                               verbatimTextOutput("generalSum")
                                               )
-
                                        )
-
                                      )
                                      ),
+                 # Modeling page
                  navbarMenu("Modeling",
+                            
+                            # Tab for Modeling Information
                             tabPanel("Modeling Information",
                                      h4("Supervised Learning"),
                                      tags$br(),
+
                                      p("Supervised learning means there are predictor variables
                                        in our data set which can be used to represent a response
                                        variable. For this app, repeated (3 times), cross-validation,
                                        was used to tune and select the optimal model for prediction.
                                        As the response, Severity, is categorical accuracy should
                                        be used to make fit comparions among the three models."),
+
                                      tags$br(),
                                      h4("Generalized Linear Model"),
                                      tags$br(),
@@ -264,7 +268,10 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                        (shown below) to link the proportion of maligant, in the case
                                        of the breast mass data, occurances out of total occurances
                                        back to a linear model."),
+
+                 # Renders LaTex
                   withMathJax(helpText("$$\\text{logit = }\\log\\left( \\frac{p}{1-p} \\right)$$")),
+
                                      p("Pros: Unlike classification trees and random forest,
                                        the GLM approach allows for prediction and interpetation in
                                        the form of parameter estimates."),
@@ -274,6 +281,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                        select 'optimal' predictors from the formula provided."),
                                      tags$br(),
                                      tags$br(),
+
                                      h4("Classification Tree Model"),
                                      tags$br(),
                                      p("Tree based methods create predictions by dividing predictors
@@ -284,16 +292,19 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                        prevent overfitting. For this app repeated, 
                                        cross-validatation with tuning parameter complexity parameter
                                        select the optimal number of nodes."),
+
                                      p("Pros: Easy to understand and variable selection is built in.
                                      Little background knowledge is needed follow the tree plot."),
                                      p("Cons: Prone to fluacations based on small changes in the
                                        data. As each split is only made by looking one step ahead,
                                        it is possible that this greedy algorithm misses the optimal
                                        path."),
+
                                      tags$br(),
                                      tags$br(),
                                      h4("Random Forest Model"),
                                      tags$br(),
+
                                      p("Random forest models use bootstrapping to create multiple
                                        trees, in this case classification trees, and average over
                                        the results of all bootstrap samples. Predictors are randomly
@@ -303,7 +314,10 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                        of randomly selected predictors to be used by the model.
                                        For classification random forest models m is normally the
                                        square root of the number of predictors."),
+
+                                     # Renders LaTex
                                      withMathJax(helpText("$$\\text{m = }\\sqrt{p}$$")),
+
                                      p("Pros: Not restricted to using all the predictors.
                                        Randomly selects predictors unlike classification tree's
                                        greedy algorithm."),
@@ -311,33 +325,35 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                        This model is prone to overfitting. Computationally 
                                        intensive in comparions to GLM.")
                             ),
-                            
-                            
-                            
 
+                            # Model fitting tab
                             tabPanel("Fitting",
                                      fluidRow(
                                        column(3,
+                                              # Radio Button to talk fit output
                                               prettyRadioButtons(
                                                 inputId = "modSelect",
                                                 label = "Select a model fit:",
                                                 choices = c("GLM", "Classification Tree",
                                                             "Random Forest"), selected = "GLM",
                                                 inline = TRUE, status = "info", fill = FALSE
-                                              )
-                                              ,
+                                              ),
+                                              # Data split ratio  numeric input selector
                                               numericInput("percent", "Data Split Ratio", 0.70,
                                                            min = 0.40, max = 0.80
                                                            , step = .05),
+                                              # k-folds numeric input selector
                                               numericInput("kfolds", "k-folds for Cross-Validation",
                                                            5, min = 5, max = 10
                                                            , step = 5),
+                                              # cp slider
                                               sliderInput("sliderCP",
                                                           label = "Complexity Paramater Range",
                                                           min = .01,
                                                           max = .1,
                                                           value = .1
                                               ),
+                                              # mtrys slider
                                               sliderInput("mtrys",
                                                           label = "mtry Range",
                                                           min = 2,
@@ -345,6 +361,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                           value = 3
                                               ),
 
+                                              # Variable selection box for model call
                                               pickerInput("modVar",
                                                           "Select desired predictors:",
                                                           choices = c("Shape", "Margin", "Density",
@@ -370,13 +387,17 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                             helpText("See the 'Results' page for additonal output.")
                                        ),
                                        column(9,
+                                              # Renders fit summary
                                               verbatimTextOutput("fitSummary")
                                               )
                                      )
                                      ),
+
+                            # Model (additonal) results tab
                             tabPanel("Results",
                                      fluidRow(
                                        column(2,
+                                              # Radio buttons to select model for confusion matrix
                                               prettyRadioButtons(
                                                 inputId = "resultsSelect",
                                                 label = "Select a model for the confusion matrix:",
@@ -389,6 +410,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                               helpText("Note: Page may take a few seconds to load.")
                                               ),
                                        column(9,
+                                              # Renders confusion matrix
                                               uiOutput("confuName"),
                                               verbatimTextOutput("confusion")
                                               
@@ -397,14 +419,18 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                      fluidRow(
                                        column(6,
                                               h6("Classification Tree Plot"),
+                                              # Renders classification tree plot
                                               plotOutput("treePlot")
                                               ),
                                        column(6,
                                               h6("Random Forest Variable of Importance Plot"),
+                                              # Renders random forest variable of importance plot
                                               plotOutput("varImpPlot")
                                               )
                                      )
                                      ),
+
+                            # Model prediction tab
                             tabPanel("Predition",
                                      titlePanel(
                                        uiOutput("ptInfo")
@@ -413,16 +439,19 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                        column(3,
                                               helpText("Note: Prediction updates after each new
                                                        selection."),
+                                              # Selector for new patient age
                                               numericInput(inputId = 'predAge',
                                                           label = 'Age',
                                                           value = 35,
                                                           min = 18, max = 100),
+                                              # Selector for new mass shape
                                               selectInput("predShape",
                                                            "Shape",
                                                            choices = c("round", "oval", "lobular",
                                                                        "irregular"),
                                                            selected = "round"
                                               ),
+                                              # Selector for new mass margin
                                               selectInput("predMarg",
                                                            "Margin",
                                                            choices = c("circumscribed",
@@ -431,6 +460,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                                                        "spiculated"),
                                                           selected = "circumscribed"
                                               ),
+                                              # Selector for new mass density
                                               selectInput("predDens",
                                                           "Density",
                                                           choices = c("high", "iso", "low",
@@ -440,14 +470,17 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                               ),
                                        column(3,
                                               h6("GLM Prediction"),
+                                              # Renders prediction from the glm
                                               verbatimTextOutput("predResGLM")
                                               ),
                                        column(3,
                                             h6("Classification Tree Prediction"),
+                                            # Renders classification tree prediction
                                              verbatimTextOutput("predResCla")
                                              ),
                                        column(3,
                                             h6("Random Forest Prediction"),
+                                            # Renders random forest prediction
                                              verbatimTextOutput("predResRF")
                                        )
                                      )))

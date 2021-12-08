@@ -5,10 +5,13 @@
 #Date: 2021/12/05                                                       ;
 ########################################################################;
 
-
+# Required packages
 library(tidyverse)
 
+# Sets seed for reproducibility
 set.seed(998)
+
+# Reads in "mammographic_masses.csv" and produces raw data frame
 raw <- read_csv("mammographic_masses.csv",
                 col_names = c("BI-RADS", "Age", "numShape", "numMargin",
                               "numDensity", "numSeverity"), na = "?") %>%
@@ -26,4 +29,5 @@ raw <- read_csv("mammographic_masses.csv",
                      labels = c("benign", "maligant"))
   ) %>% select(1:2, 7:10)
 
+# Creates data frame for plotting and modeling
 split <- raw %>% na.omit() %>% select(2:6)

@@ -6,14 +6,9 @@
 ########################################################################;
 
 
+# Required packages
 library(caret)
 library(rpart.plot) 
-# library(markdown)
-# library(rlang)
-# library(boot)
-# library(class)
-# library(tree)
-# library(rpart)
 
 
 server <- function(session, input, output) {
