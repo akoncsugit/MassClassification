@@ -1,9 +1,8 @@
 library(shiny)
 library(shinythemes)
 library(shinyWidgets)
-library(markdown)
 
-ui <- navbarPage(theme = shinytheme("cosmo"),
+ui <- navbarPage(theme = shinytheme("flatly"),
                  "My Application",
                  tabPanel("About",
                           includeMarkdown("about.md")),
@@ -107,7 +106,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                                ),
                                                                pickerInput(inputId = 'fill',
                                                                            label = 'Fill Variable:',
-                                                                           choices = c("Age", "Severity", "Margin", "Shape", "Density"),
+                                                                           choices = c("Severity", "Margin", "Shape", "Density"),
                                                                            selected = "Severity"
                                                                )
                                               ),
@@ -119,9 +118,8 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                                                        "Shape", "Density"),
                                                                            selected = "Margin"
                                                                )
-                                              )
-                                              
-                                              
+                                              ),
+                                            
                                               #,downloadButton("downloadPlot", label = "Download Current Plot")
                                        ),
                                        column(9,
@@ -133,23 +131,50 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                             tabPanel("Numeric Summary",
                                      fluidRow(
                                        column(3,
-                                              "sidebar",
-                                              pickerInput(
-                                                inputId = "conPick",
-                                                label = "Select Variables for Contigency Table",
-                                                choices = c("Severity", "Margin", "Shape", "Density"),
-                                                multiple = TRUE,
-                                                options =  list(
-                                                  "max-options" = 3
-                                                )),
-                                              actionBttn("conTab", "Run")
+                                              prettyRadioButtons(
+                                                inputId = "editConTab",
+                                                label = "Edit contingency table:", 
+                                                choices = c("One-Way", "Two-Way", "Three-Way"),
+                                                selected = "Two-Way",
+                                                inline = TRUE, 
+                                                status = "info",
+                                                fill = FALSE
+                                              ),
+                                              conditionalPanel(condition = "input.editConTab == 'One-Way'",
+                                                               pickerInput(inputId = 'oneWay',
+                                                                           label = "Select one-way variable:",
+                                                                           choices = c("Severity", "Margin",
+                                                                                       "Shape", "Density"),
+                                                                           selected = "Margin"
+                                                               )
+                                              ),
+                                              conditionalPanel(condition = "input.editConTab == 'Two-Way'",
+                                                               pickerInput(inputId = 'twoWay',
+                                                                           label = "Select two-way variable:",
+                                                                           choices = c("Severity|Margin",
+                                                                                       "Severity|Density",
+                                                                                       "Severity|Shape"),
+                                                                           selected = "Severity|Shape"
+                                                               )
+                                              ),
+                                       conditionalPanel(condition = "input.editConTab == 'Three-Way'",
+                                                        pickerInput(inputId = 'threeWay',
+                                                                    label = "Select two-way variable:",
+                                                                    choices = c("Margin|Density|Severity",
+                                                                                "Margin|Shape|Severity",
+                                                                                "Shape|Density|Severity",
+                                                                                "Shape|Margin|Density"
+                                                                                ),
+                                                                    selected = "Margin|Density|Severity"
+                                                        )
+                                              )
 
                                        ),
                                        column(9,
-                                              "Contingency Tab",
-                                              #verbatimTextOutput("con"),
-                                              "Summary"#,
-                                              #verbatimTextOutput("summary")
+                                              "Contingency Table",
+                                              verbatimTextOutput("conTab"),
+                                              "Simple Summary",
+                                              verbatimTextOutput("generalSum")
                                               )
 
                                        )

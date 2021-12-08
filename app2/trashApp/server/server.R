@@ -1,19 +1,16 @@
-library(shiny)
-library(shinythemes)
-library(shinyWidgets)
-library(markdown)
-library(rlang)
-library(tidyverse)
-library(boot)
-library(class)
-library(tree)
-library(caret)
-library(rpart)
-library(rpart.plot) 
+
+# library(markdown)
+# library(rlang)
+
+# library(boot)
+# library(class)
+# library(tree)
+# library(caret)
+# library(rpart)
+# library(rpart.plot) 
 
 server <- function(session, input, output) {
   
-  ### about page
   ### data page
 
   getRawData <- reactive({ raw })
@@ -83,10 +80,13 @@ server <- function(session, input, output) {
   # 
   # 
   # downloadPlot #download handler plot
+  # 
+  # t + labs(x = "New x axis label", y = "New y axis label",
+  
 
   output$sumPlot <- renderPlot ({
     if(input$plotType == "Histogram") {
-      hist <- ggplot(split, aes(Age))
+      hist <- ggplot(split, aes(Age)) +  labs(title = "Histogram of Age")
       if(input$switchColors){
         hist + geom_histogram(binwidth = input$histBins, aes(fill = input$fill)) +
           scale_fill_brewer(palette = input$color) + theme(legend.position="none")
@@ -94,27 +94,89 @@ server <- function(session, input, output) {
         hist + geom_histogram(binwidth = input$histBins, aes(fill = Age)) +
           theme(legend.position="none")
       }
-    } else if (input$plotTye == "Bar") {
-      bar<- ggplot(split, aes(input$xaxis, Age))
+    } else if (input$plotType == "Bar") {
+      bar <- ggplot(split, aes_string(input$xaxis)) +
+        labs(title = tools::toTitleCase(paste0("Bar Plot of ", input$xaxis,
+                                               " (fill: ", input$fill, ")")))
       if(input$switchColors){
-        bar + geom_bar(position = "dodge", aes(fill = input$fill)) + scale_fill_brewer(palette = input$color)
+        bar + geom_bar(position = "dodge", aes_string(fill = input$fill)) +
+          scale_fill_brewer(palette = input$color) 
       } else {
-        bar + geom_bar(position = "dodge", aes(fill = input$fill))
+        bar + geom_bar()
       }
-      
     } else if(input$plotType == "Box") {
+      box <- ggplot(split, aes_string(input$xaxis, "Age"))+
+        geom_boxplot(aes_string(fill = input$fill)) + facet_wrap(formula(paste("~", input$facet))) +
+        labs(title = tools::toTitleCase(paste0("Box Plot of Age by ", input$xaxis, " (fill: ",
+                                               input$fill, ", facet: ", input$facet, ")")))
       if(input$switchColors){
-        + scale_fill_brewer(palette = input$color)
+        box + scale_fill_brewer(palette = input$color)
       } else {
-        
+        box
       }
-      
     }
   })
 
 
+ output$conTab <- renderPrint({
+   if(input$editConTab == "One-Way") {
+     
+     if(input$oneWay == "Severity"){
+       
+       table("Severity" = split$Severity)
+       
+     } else if(input$oneWay == "Margin"){
+       
+       table("Margin" = split$Margin)
+       
+     } else if(input$oneWay == "Density"){
+       
+       table("Density" = split$Density)
+       
+     } else if(input$oneWay == "Shape"){
+       
+       table("Shape" = split$Shape)
+     }
+   } else if (input$editConTab == "Two-Way") {
+     
+     if(input$twoWay == "Severity|Margin"){
+       
+       table("Severity" = split$Severity, "Margin" = split$Margin)
+       
+     } else if(input$twoWay == "Severity|Density"){
+       
+       table("Severity" = split$Severity, "Density" = split$Density)
+       
+     } else if(input$twoWay == "Severity|Shape"){
+       
+       table("Severity" = split$Severity, "Shape" = split$Shape)
+     }
+   } else if (input$editConTab == "Three-Way") {
+     
+     if (input$threeWay == "Margin|Density|Severity"){
+       
+       table("Margin" = split$Margin,"Density" = split$Density, "Severity" = split$Severity)
+       
+     } else if(input$threeWay == "Margin|Shape|Severity"){
+       
+       table("Margin" = split$Margin,"Shape" = split$Shape, "Severity" = split$Severity)
+       
+     } else if(input$threeWay == "Shape|Density|Severity"){
+       
+       table("Shape" = split$Shape, "Density" = split$Density, "Severity" = split$Severity)
+       
+     } else if (input$threeWay == "Shape|Margin|Density"){
+       
+       table("Shape" = split$Shape, "Margin" = split$Margin, "Density" = split$Density)
+       
+     }
+   }
 
+ })
 
+ output$generalSum<- renderPrint({
+   summary(raw)
+ })
 
   # ## numeric page
   #

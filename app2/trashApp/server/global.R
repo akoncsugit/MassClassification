@@ -3,7 +3,6 @@
 
 library(tidyverse)
 
-
 set.seed(998)
 raw <- read_csv("mammographic_masses.csv",
                 col_names = c("BI-RADS", "Age", "numShape", "numMargin",
@@ -23,4 +22,3 @@ raw <- read_csv("mammographic_masses.csv",
   ) %>% select(1:2, 7:10)
 
 split <- raw %>% na.omit() %>% select(2:6)
-
