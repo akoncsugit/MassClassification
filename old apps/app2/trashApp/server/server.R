@@ -10,13 +10,14 @@
 library(caret)
 library(rpart.plot) 
 
-
+# Establishes app server
 server <- function(session, input, output) {
   
-  ### data page
-
+  # Data Page
+  # Gets raw data
   getRawData <- reactive({ raw })
-  
+
+  # Reactive which filters and subsets raw data using conditonal logic
   filsubDat <- reactive({
     if(input$filtVar == "Severity") {
       if(is.null(input$pickerSubset)) {
@@ -55,10 +56,12 @@ server <- function(session, input, output) {
     }
   })
 
+  # Calls filsubDat to filter and subset data which is returned for display
   output$myTable <- renderDataTable({
     filsubDat()
   })
 
+  # Download handler for download data button saves data as csv
   output$dataDownload <- downloadHandler(
     filename = function(){
       paste0("dataframe", ".csv")
@@ -69,23 +72,9 @@ server <- function(session, input, output) {
   )
   
 
+  # Data Exploration Page
 
-  # ### graph page
-  # switchColors
-  # color
-  # plotType
-  # fill
-  # histBins
-  # maxBins
-  # xaxis
-  # facet
-  # 
-  # 
-  # downloadPlot #download handler plot
-  # 
-  # t + labs(x = "New x axis label", y = "New y axis label",
-  
-
+  # Creates plot using conditional logic and user input
   output$sumPlot <- renderPlot ({
     if(input$plotType == "Histogram") {
       hist <- ggplot(split, aes(Age)) +  labs(title = "Histogram of Age")
@@ -120,83 +109,47 @@ server <- function(session, input, output) {
   })
 
 
+ # Creates contigency table using input and returns it to ui
  output$conTab <- renderPrint({
    if(input$editConTab == "One-Way") {
-     
      if(input$oneWay == "Severity"){
-       
        table("Severity" = split$Severity)
-       
      } else if(input$oneWay == "Margin"){
-       
        table("Margin" = split$Margin)
-       
      } else if(input$oneWay == "Density"){
-       
        table("Density" = split$Density)
-       
      } else if(input$oneWay == "Shape"){
-       
        table("Shape" = split$Shape)
      }
    } else if (input$editConTab == "Two-Way") {
-     
      if(input$twoWay == "Severity|Margin"){
-       
        table("Severity" = split$Severity, "Margin" = split$Margin)
-       
      } else if(input$twoWay == "Severity|Density"){
-       
        table("Severity" = split$Severity, "Density" = split$Density)
-       
      } else if(input$twoWay == "Severity|Shape"){
-       
        table("Severity" = split$Severity, "Shape" = split$Shape)
      }
    } else if (input$editConTab == "Three-Way") {
-     
      if (input$threeWay == "Margin|Density|Severity"){
-       
        table("Margin" = split$Margin,"Density" = split$Density, "Severity" = split$Severity)
-       
      } else if(input$threeWay == "Margin|Shape|Severity"){
-       
        table("Margin" = split$Margin,"Shape" = split$Shape, "Severity" = split$Severity)
-       
      } else if(input$threeWay == "Shape|Density|Severity"){
-       
        table("Shape" = split$Shape, "Density" = split$Density, "Severity" = split$Severity)
-       
      } else if (input$threeWay == "Shape|Margin|Density"){
-       
        table("Shape" = split$Shape, "Margin" = split$Margin, "Density" = split$Density)
-       
      }
    }
-
  })
 
+ # Returns basic data summary to ui
  output$generalSum<- renderPrint({
    summary(raw)
  })
 
-  # ## numeric page
-  #
-  # render plot "sumPlot"
-  #
-  # conPick
-  # conTab # action button
-  #
-  # render table "con"
-  # render output "summary"
-  #
-  # ## model info
-  #
-  #
-  #
-  # ## model fit
+  # Modeling page
 
-  # Train/Test data split
+  # Creates Train/Test data split based on user input
   moddat <- reactive({
     index <- sample(seq_len(nrow(split)), size = floor(input$percent*nrow(split)))
     train <- split[index,]
@@ -204,33 +157,35 @@ server <- function(session, input, output) {
     return(list(Train=train, Test=test))
   })
 
+  # Generates model call from user input
   form <- reactive({
     formula((gsub(" ", "+", paste("Severity", paste0(input$modVar, collapse = " "), sep = "~"))))
   })
-  
 
-  
+  # Train control function based on user input
   trCtrl <- reactive({
     trainControl(method = "repeatedcv", number = input$kfolds, repeats = 3)
   })
-  
 
+  # Fits GLM
   glmFit <- reactive({
    train(form(), data = moddat()[["Train"]], method = "glm", family = "binomial",
          trControl = trCtrl())
     })
-  
+
+  # Fits Classification Tree
   class <- reactive({
   train(form(), data =  moddat()[["Train"]], method = "rpart", trControl=trCtrl(),
         tuneGrid = data.frame(cp = seq(0, input$sliderCP, 0.001)))
   })
-  
+
+  # Fits Random Forest 
   rfFit <- reactive({
     train(form(), data =  moddat()[["Train"]], method = "rf", trControl=trCtrl(),
           tuneGrid = data.frame(mtry = 1:input$mtrys))
   })
 
-
+  # Uses conditional logic to output fit results
   output$fitSummary <- renderPrint({
     if(input$modSelect == "GLM") {
       summary(glmFit())
@@ -240,15 +195,14 @@ server <- function(session, input, output) {
       rfFit()
     }
   })
-  
 
-  
+  # Dynamic text to render above contigency table
   output$confuName <- renderUI({
     h6(tools::toTitleCase(paste0("Test Prediction Confusion Matrix for the ",
                                  input$resultsSelect, " model.")))
   })
-  
-  
+
+  # Creats confusion matrix based on conditional logic and user input
   output$confusion <- renderPrint({
     if(input$resultsSelect == "Generalized Linear"){
       confusionMatrix(glmFit(), newdata = moddat()[["Test"]])
@@ -259,39 +213,40 @@ server <- function(session, input, output) {
     }
   })
 
-  
-  
+  # Creates classification plot and sends to ui
   output$treePlot <- renderPlot({
     rpart.plot(class()$finalModel, box.palette="GnRd", nn=TRUE)
   })
+
+  # Creates variable importance plot for random forest model and sends to ui
   output$varImpPlot <- renderPlot({
     plot(varImp(rfFit()), top = 10)
   })
-  
 
+  # Generates a dynamic title for prediction page
   output$ptInfo <- renderUI({
     h3(strong(paste0("Predictions for a mass from a ", input$predAge,
                                  " year old patient with shape: ",
                                  input$predShape, ", density: ", input$predDens, ", and margin: ",
                                  input$predMarg, ".")))
   })
-  
-  
+
+  # Returns prediction from glm based on user input
   output$predResGLM <- renderPrint({
     predict(glmFit(),  data.frame(Age = input$predAge, Shape = input$predShape,
                                   Margin = input$predMarg, Density = input$predDens))
   })
-  
+
+  # Returns prediction from classification tree based on user input
   output$predResCla<- renderPrint({
     predict(class(), data.frame(Age = input$predAge, Shape = input$predShape,
                                 Margin = input$predMarg, Density = input$predDens))
   })
-  
+
+  # Returns prediction from random forest based on user input
   output$predResRF <- renderPrint({
     predict(rfFit(), data.frame(Age = input$predAge, Shape= input$predShape,
                              Margin = input$predMarg, Density = input$predDens))
   })
-  
-
-
+ 
  }
