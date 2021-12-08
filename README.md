@@ -37,7 +37,7 @@ Citation:
 # Code for Installing All the Packages
 
 ```R
-install.packages(c("caret", "DT", "rpart.plot", "shiny", "shinythemes, "shinyWidgets", "tidyverse"))
+install.packages(c("caret", "DT", "rpart.plot", "shiny", "shinythemes", "shinyWidgets", "tidyverse"))
 ```
 
 # Code to Launch App
