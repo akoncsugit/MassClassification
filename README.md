@@ -1,4 +1,4 @@
-# ST558 Project 3 - Mammographic Mass Lesion Classification Using Supervised Learning
+# Mammographic Mass Lesion Classification Using Supervised Learning
 
 
 # App Description
