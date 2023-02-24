@@ -37,7 +37,7 @@ install.packages(c("caret", "rpart.plot", "shiny", "shinythemes", "shinyWidgets"
 # Code to Launch App
 
 ```R
-shiny::runGitHub(repo = "ST558Project3", username = "akoncsugit",
+shiny::runGitHub(repo = "MassClassification", username = "akoncsugit",
 ref = "main", subdir = "/app/", launch.browser = TRUE)
 ```
 
