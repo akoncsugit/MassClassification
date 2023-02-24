@@ -25,12 +25,7 @@ Citation:
 
 # List of Packages
 
-`caret`
-`rpart.plot`
-`shiny`
-`shinythemes`
-`shinyWidgets`
-`tidyverse`
+`caret`, `rpart.plot`, `shiny`, `shinythemes`, `shinyWidgets`, `tidyverse`
 
 
 # Code for Installing All the Packages
