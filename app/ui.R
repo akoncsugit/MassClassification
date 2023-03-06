@@ -1,7 +1,7 @@
 ########################################################################;
 #Author:  Ashley Ko                                                     ;
-#Title: ST558 Project 3 ui                                              ;
-#Program Purpose: To complete ST558 project 3 requirements              ;
+#Title: Mass Classifier UI                                              ;
+#Program Purpose: Demonstrate skill data visualization, ML, & R Shiny   ;
 #Date: 2021/12/05                                                       ;
 ########################################################################;
 
