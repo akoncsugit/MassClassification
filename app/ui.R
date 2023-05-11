@@ -275,7 +275,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                      p("Pros: Unlike classification trees and random forest,
                                        the GLM approach allows for prediction and interpetation in
                                        the form of parameter estimates."),
-                                     p("Cons: GLM models only fit the model provides. This means 
+                                     p("Cons: GLM models only fit the model provided. This means 
                                        all the predictors passed to the model are used regardless
                                        of importance. Classification trees and random forest models
                                        select 'optimal' predictors from the formula provided."),
