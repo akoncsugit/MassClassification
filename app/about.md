@@ -36,7 +36,7 @@ further explore the data set. There are options for `one-way`, `two-way`, and `t
 contingency tables complete with corresponding variable selection.
 
 ---
-## Modeling
+### Modeling
 
 This portion of the app allows for the creation of three customized supervised learning models, 
 renders custom results, and generates predictions based on the fitted models. The supervised 
