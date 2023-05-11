@@ -1,10 +1,10 @@
 ########################################################################;
-#Author:  Ashley Ko                                                     ;
-#Title: Mass Classifier server                                          ;
-#Program Purpose: Demonstrate skill data visualization, ML, & R Shiny   ;
-#Date: 2021/12/05                                                       ;
+# Author: Ashley Ko                                                     ;
+# Title: Mass Classifier server                                         ;
+# Program Purpose: Demonstrate skills: data visualization, ML, & R Shiny;
+# Date: 2021/12/05                                                      ;
+# Updated: 2023/05/11                                                   ;
 ########################################################################;
-
 
 # Required packages
 library(caret)
@@ -17,7 +17,7 @@ server <- function(session, input, output) {
   # Gets raw data
   getRawData <- reactive({ raw })
 
-  # Reactive which filters and subsets raw data using conditonal logic
+  # Reactive which filters and subsets raw data using conditional logic
   filsubDat <- reactive({
     if(input$filtVar == "Severity") {
       if(is.null(input$pickerSubset)) {
@@ -70,7 +70,6 @@ server <- function(session, input, output) {
       write.csv(filsubDat(), file)
     }
   )
-  
 
   # Data Exploration Page
 
@@ -108,8 +107,7 @@ server <- function(session, input, output) {
     }
   })
 
-
- # Creates contigency table using input and returns it to ui
+ # Creates contingency table using input and returns it to ui
  output$conTab <- renderPrint({
    if(input$editConTab == "One-Way") {
      if(input$oneWay == "Severity"){
@@ -196,7 +194,7 @@ server <- function(session, input, output) {
     }
   })
 
-  # Dynamic text to render above contigency table
+  # Dynamic text to render above contingency table
   output$confuName <- renderUI({
     h6(tools::toTitleCase(paste0("Test Prediction Confusion Matrix for the ",
                                  input$resultsSelect, " model.")))
@@ -248,5 +246,5 @@ server <- function(session, input, output) {
     predict(rfFit(), data.frame(Age = input$predAge, Shape= input$predShape,
                              Margin = input$predMarg, Density = input$predDens))
   })
- 
+
  }

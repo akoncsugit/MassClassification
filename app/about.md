@@ -80,22 +80,22 @@ understanding.
 
 The variables in this data set are as follows:
 
-`BI-RADS` assessment: 1 to 5 (ordinal, non-predictive)
+`BI-RADS`: assessment (1 to 5; ordinal, non-predictive)
 
 `Age`: patient's age in years (integer)
 
-`Shape`: mass shape: round=1 oval=2 lobular=3 irregular=4 (nominal)
+`Shape`: mass shape (round = 1, oval = 2, lobular = 3, or irregular = 4; nominal)
 
-`Margin`: mass margin: circumscribed=1 microlobulated=2 obscured=3 ill-defined=4 spiculated=5 (nominal)
+`Margin`: mass margin (circumscribed = 1, microlobulated = 2, obscured = 3, ill-defined = 4, or spiculated = 5; nominal)
 
-`Density`: mass density high=1 iso=2 low=3 fat-containing=4 (ordinal)
+`Density`: mass density (high = 1, iso = 2, low = 3, fat-containing = 4; ordinal)
 
-`Severity`: benign=0 or malignant=1 (binominal, response)
-
-
+`Severity` benign/malignant (benign = 0 or malignant = 1; binomial, response)
 
 
-![](lesions.png)
+
+
+![](lesionsimage.png)
 
 This image illustrates some of the different attributes of mammary mass lesion shape and margin.
 

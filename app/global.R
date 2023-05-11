@@ -1,8 +1,9 @@
 ########################################################################;
-#Author:  Ashley Ko                                                     ;
-#Title: Mass Classifier global environment helper                       ;
-#Program Purpose: Demonstrate skill data visualization, ML, & R Shiny   ;
-#Date: 2021/12/05                                                       ;
+# Author: Ashley Ko                                                     ;
+# Title: Mass Classifier global environment helper                      ;
+# Program Purpose: Demonstrate skills: data visualization, ML, & R Shiny;
+# Date: 2021/12/05                                                      ;
+# Updated: 2023/05/11                                                   ;
 ########################################################################;
 
 # Required packages

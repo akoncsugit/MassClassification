@@ -1,10 +1,10 @@
 ########################################################################;
-#Author:  Ashley Ko                                                     ;
-#Title: Mass Classifier UI                                              ;
-#Program Purpose: Demonstrate skill data visualization, ML, & R Shiny   ;
-#Date: 2021/12/05                                                       ;
+# Author: Ashley Ko                                                     ;
+# Title: Mass Classifier UI                                             ;
+# Program Purpose: Demonstrate skills: data visualization, ML, & R Shiny;
+# Date: 2021/12/05                                                      ;
+# Updated: 2023/05/11                                                   ;
 ########################################################################;
-
 
 # Required packages
 library(shiny)
@@ -29,7 +29,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                  "Shape", "Density"), selected = "None",
                                      inline = TRUE, status = "info", fill = FALSE
                                      ),
-                                   # Conditonal Panel for selecting variable levels for filtering
+                                   # Conditional Panel for selecting variable levels for filtering
                                    # data based on previously selected filter variable Severity
                                    conditionalPanel(condition = "input.filtVar == 'Severity'",
                                                     pickerInput(inputId = 'filSeverity',
@@ -38,7 +38,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                                 selected = "maligant"
                                                     )
                                    ),
-                                   # Conditonal Panel for selecting variable levels for filtering
+                                   # Conditional Panel for selecting variable levels for filtering
                                    # data based on previously selected filter variable Margin
                                    conditionalPanel(condition = "input.filtVar == 'Margin'",
                                                     pickerInput(inputId = 'filMargin',
@@ -71,14 +71,14 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                                 selected = "high"
                                                     )
                                    ),
-                                   # Picker Input for selecting subseting variable
+                                   # Picker Input for selecting subsetting variable
                                    pickerInput("pickerSubset",
                                                "Select variables for subset:",
                                                choices = c("Age", "Shape", "Margin", "Density"),
                                                selected = "Age",
                                                multiple = TRUE
                                                ),
-                                   # Button which prompts download handeler to render a csv file
+                                   # Button which prompts download handler to render a csv file
                                   downloadButton(outputId = "dataDownload", label = "Download Data")
                                    ),
                             column(10,
@@ -109,7 +109,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                 fill = FALSE
                                               ),
                                               # Conditional Panel that displays color palette
-                                              #  options
+                                              # options
                                               conditionalPanel(condition = "input.switchColors",
                                                                pickerInput(
                                                                  inputId = "color",
@@ -120,7 +120,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                                                              "Pastel1", "Pastel2"))
                                                                ),
                                               # Conditional Panel that displays bin width for the
-                                              #  histogram
+                                              # histogram
                                               conditionalPanel(condition = "input.plotType == 
                                                                'Histogram'",
                                                                sliderInput("histBins", "Bin Width:",
@@ -261,10 +261,10 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                        that the model relies on a linear relationship between the
                                        response and predictor variables. In the GLM case, responses
                                        follow non-normal distribution. The purposes of this
-                                       application is to classify mammary masses by 'Severity'
+                                       application is to classify mammary masses by Severity
                                        either malignant or bengin. This creates a binomial model
                                        with where the bengin condition is 0 and the malignant
-                                       condition is 1. This type of model uses a `logit` function
+                                       condition is 1. This type of model uses a logit function
                                        (shown below) to link the proportion of maligant, in the case
                                        of the breast mass data, occurances out of total occurances
                                        back to a linear model."),
@@ -278,7 +278,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                      p("Cons: GLM models only fit the model provided. This means 
                                        all the predictors passed to the model are used regardless
                                        of importance. Classification trees and random forest models
-                                       select 'optimal' predictors from the formula provided."),
+                                       select optimal predictors from the formula provided."),
                                      tags$br(),
                                      tags$br(),
 
@@ -310,7 +310,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                        the results of all bootstrap samples. Predictors are randomly
                                        selected for each tree and all predictors supplied to the
                                        model are used at once. This app applies cross-validation,
-                                       to select the optimal 'mtrys'. M (mtrys) is the number
+                                       to select the optimal mtrys. M (mtrys) is the number
                                        of randomly selected predictors to be used by the model.
                                        For classification random forest models m is normally the
                                        square root of the number of predictors."),
@@ -321,7 +321,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                                      p("Pros: Not restricted to using all the predictors.
                                        Randomly selects predictors unlike classification tree's
                                        greedy algorithm."),
-                                     p("Cons: Results allow for prediction but not interpretation.
+                                     p("Cons: Results allow for prediction, but not interpretation.
                                        This model is prone to overfitting. Computationally 
                                        intensive in comparions to GLM.")
                             ),
