@@ -17,7 +17,7 @@ Citation:
 *The prediction of breast cancer biopsy outcomes using two CAD approaches that both emphasize an*
 *intelligible decision process.*
 *Medical Physics 34(11), pp. 4164-4172* 
-[Data Source](http://archive.ics.uci.edu/ml/datasets/mammographic+mass)
+[Source](http://archive.ics.uci.edu/ml/datasets/mammographic+mass)
 
 # List of Packages
 
